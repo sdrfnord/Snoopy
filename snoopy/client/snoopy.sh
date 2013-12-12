@@ -110,7 +110,7 @@ function check_tubes {
 
 # n900 has some special requirements/limitations
 n900_sniff(){
-	tshark -q -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+	tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 	t_pid=$!
 }
 linux_sniff(){
@@ -152,11 +152,11 @@ run_id=`date +%s`"_"$RANDOM
 mkdir -p ~/.tmp/
 
 if [[ "$arch" == "n900" ]]; then
-                tshark -q -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+                tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 
         elif [[ "$arch" == "linux" ]]; then
 		
-                tshark -q -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+                tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
         fi
         t_pid=$!
 	echo "[+] Client probe requests can be viewed via 'tail -f $save_path/probe_data.txt'"
