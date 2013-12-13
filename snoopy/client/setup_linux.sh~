@@ -31,9 +31,6 @@ $sd/snoopy.sh
 EOL
 chmod +x /usr/bin/snoopy
 
-# Add this to prevent udhcp from starting by itself at boot
-update-rc.d udhcp disable
-
 echo "+-----------------------------------------------------------------------------+"
 echo "+ Done. Run 'snoopy' now.  					 	    +"
 echo "+-----------------------------------------------------------------------------+"

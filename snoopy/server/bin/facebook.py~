@@ -20,12 +20,7 @@ def do_fb(snoopyDir):
 	global cursor	
 
 	cursor.execute("SELECT get_fb_from_squid.c_user,get_fb_from_squid.cookies,get_fb_from_squid.client_ip FROM get_fb_from_squid LEFT JOIN facebook ON facebook.degree = 0 AND get_fb_from_squid.c_user = facebook.id WHERE facebook.id IS NULL")
-	results1=cursor.fetchall()
-
-	cursor.execute("SELECT get_fb_from_squid2.__user,get_fb_from_squid2.cookies,get_fb_from_squid2.client_ip FROM get_fb_from_squid2 LEFT JOIN facebook ON facebook.degree = 0 AND get_fb_from_squid2.__user = facebook.id WHERE facebook.id IS NULL")
-	results2=cursor.fetchall()
-	
-	results = results1 + results2
+	results=cursor.fetchall()
 
 	for row in results:
 		id,cookie,ip=row[0],row[1],row[2]	
