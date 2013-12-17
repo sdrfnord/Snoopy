@@ -429,6 +429,11 @@ function unload_n900 {
 # Rsync	
 function sync {
 	key=$snoopyDir/configs/ssh/id_rsa
+
+	# Remove empty listing from probe_data.txt
+	sed -i '/\,\,/d' $snoopyDir/snoopy_data/probe_data.txt
+	sed -i '/\\x0/d' $snoopyDir/snoopy_data/probe_data.txt
+	
 	# Backgrounded
 	# Will including $snoopyDir variable disable ability to specify absolute commands restricting rsync?
 	while [ -r /tmp/snoopy_go ]; do rsync -e "ssh -i $key -o StrictHostKeyChecking=no" -rzt $snoopyDir/snoopy_data/ $sync_user@$sync_server:$upload_path &> /dev/null; sleep $delay_between_syncs; done &

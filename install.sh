@@ -340,14 +340,14 @@ echo "[+] Setting iptables to transparently route web traffic to squid, and masq
 #################
 # Transparent proxying. TODO: Squid SSL MITM. mitmproxy currently doesn't support transparant proxying. WPAD. EvilGrade.
 mkdir -p /etc/iptables/
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 80 -j DNAT --to 192.168.42.1:3128
+iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 80 -j DNAT --to 192.168.23.1:3128
 iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3128
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 8080 -j DNAT --to 192.168.42.1:3128
+iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 8080 -j DNAT --to 192.168.23.1:3128
 iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 8080 -j REDIRECT --to-port 3128
 # Masquerade all other ports
 iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -p tcp -o eth0 -j MASQUERADE
 # Give APs internet access
-iptables -t nat -A POSTROUTING -s 192.168.42.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.23.0/24 -o eth0 -j MASQUERADE
 iptables-save > /etc/iptables/rules.v4
 echo "[+] Saving iptables to start on reboot"
 

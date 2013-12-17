@@ -10,11 +10,8 @@ def gps_movements(mac):
         query = session.query(db.Probe, db.GpsMovement).\
                     filter(
                         db.Probe.device_mac == mac,
-                    ).filter(
                         db.Probe.monitor == db.GpsMovement.monitor,
-                    ).filter(
                         db.GpsMovement.timestamp >= db.Probe.timestamp-5,
-                    ).filter(
                         db.GpsMovement.timestamp <= db.Probe.timestamp+5,
                     ).\
                     order_by(db.GpsMovement.run_id, db.GpsMovement.timestamp)
