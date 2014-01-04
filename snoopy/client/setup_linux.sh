@@ -34,6 +34,9 @@ chmod +x /usr/bin/snoopy
 # Add this to prevent udhcp from starting by itself at boot
 update-rc.d udhcp disable
 
+# Add this to allow wireshark to run as root
+sed -i 's/disable_lua = false/disable_lua = true/g' /usr/share/wireshark/init.lua
+
 echo "+-----------------------------------------------------------------------------+"
 echo "+ Done. Run 'snoopy' now.  					 	    +"
 echo "+-----------------------------------------------------------------------------+"
