@@ -43,6 +43,9 @@ cd $snoopyDir
 source $snoopyDir/configs/config
 save_path=$snoopyDir/snoopy_data/$device_id
 
+## samnco: bad hack to make sure there is no udhcpd 
+killall -9 udhcpd
+
 #Procs for probesniff
 t_pid=313373133
 g_pid=313373133

@@ -46,6 +46,7 @@ echo -n "[+] Let's create a Snoopy account. Please enter a name (enter for defau
 read user
 user="${user:=woodstock}"
 
+## Samnco: To do better managemnet of user creation (manage existing users)
 useradd -c "Snoopy Account" -m $user
 if [ "$?" -ne 0 ]; then
         echo "[!] Failed to create user $user :("
