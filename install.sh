@@ -296,6 +296,8 @@ EOL
 cgi_dir=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
 mkdir -p /usr/lib/cgi-bin/$cgi_dir
 ln -s $home_dir/snoopy/server/transforms/ /usr/lib/cgi-bin/$cgi_dir/
+ln -s $home_dir/snoopy/server/bin/wigle_api_lite.py $home_dir/snoopy/server/transforms/wigle_api_lite.py
+
 
 web_dir=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
 echo "http://$server_ip/$web_dir/" > $home_dir/snoopy/server/setup/webroot_guid.txt
