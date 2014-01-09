@@ -35,7 +35,7 @@ save_dir="%s/web_data/street_views"%tmp.group(1)
 
 def wigle(account,ssid):
 
-	url={'land':"https://wigle.net/", 'login': "https://wigle.net/gps/gps/main/login", 'query':"http://wigle.net/gps/gps/main/confirmquery/"}
+	url={'land':"https://wigle.net/", 'login': "https://wigle.net/gps/gps/main/login", 'query':"https://wigle.net/gps/gps/main/confirmquery/"}
 
 	#1. Create HTTP objects with proxy
 	user,password,proxy=account
