@@ -5,16 +5,20 @@
 
 
 echo "+-----------------------------------------------------------------------+
-+ SensePost Information Security					+
-+ Snoopy Drone Installer						+
++ SensePost Information Security										+
++ Snoopy Drone Installer												+
 + http://www.sensepost.com/labs / research@sensepost.com                +
 +-----------------------------------------------------------------------+
 
 +-----------------------------------------------------------------------+
-+ This script has been tested on a BackTrack5 installation. I'll try	+
-+ install the following packages anway:					+
-+ -dnsmasq, tshark, openvpn, rsync, netcat, macchanger, psmisc, iptables+
-+  aircrack-ng                                                          +
++ This script has been tested on 										+
++ - BackTrack5 															+
++ - Kali (on Raspberry Pi board)										+
++ - Ubuntu 32b 13.04 "Vanilla" (on laptop and Beaglebone Black)			+
++																		+
++ The below packages will be installed via apt: 						+
++ - dnsmasq, tshark, openvpn, rsync, netcat, macchanger, psmisc,        +
++  iptables, aircrack-ng                                                +
 +-----------------------------------------------------------------------+
 "
 
