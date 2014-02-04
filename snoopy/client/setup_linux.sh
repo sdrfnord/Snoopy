@@ -18,7 +18,7 @@ echo "+-----------------------------------------------------------------------+
 +																		+
 + The below packages will be installed via apt: 						+
 + - dnsmasq, tshark, openvpn, rsync, netcat, macchanger, psmisc,        +
-+  iptables, aircrack-ng                                                +
++  iptables, aircrack-ng, gpsd, gpsd-clients                            +
 +-----------------------------------------------------------------------+
 "
 
@@ -26,6 +26,8 @@ echo "+-----------------------------------------------------------------------+
 sd=$(cd $(dirname "$0"); pwd)
 
 apt-get install -y dnsmasq tshark openvpn rsync netcat macchanger aircrack-ng psmisc traceroute iptables
+
+apt-get install -y gpsd gpsd-clients
 
 /etc/init.d/ssh start
 
