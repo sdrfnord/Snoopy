@@ -11,6 +11,7 @@
 ##
 ## also need to add ez_setup.py to the snoopy and run it before running pip
 
+
 clear
 echo -en "
 +-----------------------------------------------------------------------------------------------+
@@ -51,6 +52,7 @@ echo -n "[+] Let's create a Snoopy account. Please enter a name (enter for defau
 read user
 user="${user:=woodstock}"
 
+## Samnco: To do better managemnet of user creation (manage existing users)
 useradd -c "Snoopy Account" -m $user
 if [ "$?" -ne 0 ]; then
         echo "[!] Failed to create user $user :("
@@ -118,7 +120,10 @@ if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 if [ "$xplico" == "yes" ]; then
 	apt-get install -y xplico 
 fi
-pip install lxml beautifulsoup requests PIL mitmproxy ipaddr publicsuffix twisted cryptacular Flask_SQLAlchemy
+pip install lxml beautifulsoup  PIL mitmproxy ipaddr publicsuffix twisted cryptacular Flask_SQLAlchemy
+if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+
+pip install requests==0.14
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 
 echo "[+] Done installing packages. Onward and upward!"
@@ -153,7 +158,7 @@ echo "[+] Creating Snoopy Server OpenVPN configuration file"
 #tap0 is required to bind dhcp3-server to the server interface, a
 # work in progress to allow a central DHCP server.
 
-cat > /etc/openvpn/openvpn.conf << EOL
+cat > /etc/openvpn/openvpn.conf << EOF
 local $server_ip
 ;dev tun
 dev tap0
@@ -168,7 +173,7 @@ dh /etc/openvpn/easy-rsa/keys/dh1024.pem
 client-config-dir ccd
 user nobody
 group nogroup
-server 192.168.42.0 255.255.255.0
+server 192.168.23.0 255.255.255.0
 persist-key
 persist-tun
 status openvpn-status.log 5
@@ -180,12 +185,12 @@ comp-lzo
 script-security 3
 up "/usr/bin/snoopy_routes.sh"
 
-EOL
+EOF
 
 echo "[+] Adding routes for 'Server<---Drone--->Victim' communication"
 #Routes for VPN, figure out how to do this properly
 echo '#!/bin/bash
-for i in {2..100}; do ip route add 10.$i.0.0/16 via 192.168.42.$i; done' > /usr/bin/snoopy_routes.sh
+for i in {2..100}; do ip route add 10.$i.0.0/16 via 192.168.23.$i; done' > /usr/bin/snoopy_routes.sh
 chmod +x /usr/bin/snoopy_routes.sh
 /etc/init.d/openvpn start
 # For each client, the create_vpn_config.py script will
@@ -201,18 +206,18 @@ echo "[+] Configurating squid proxy with custom logging..."
 rm /etc/logrotate.d/squid3 &	#Disable log rotation
 ln -s /var/log/squid3/access.log $home_dir/snoopy/server/uploads/squid_logs.txt
 cp /etc/squid3/squid.conf /etc/squid3/squid.conf.bak
-cat > /etc/squid3/squid.conf.new << EOL
-http_port 192.168.42.1:3128 transparent
+cat > /etc/squid3/squid.conf.new << EOF
+http_port 192.168.23.1:3128 transparent
 acl vpn src 10.0.0.0/8
 http_access allow vpn
 # Use mitmproxy.py as parent proxy
-cache_peer 192.168.42.1 parent 3129 0 no-query no-digest
+cache_peer 192.168.23.1 parent 3129 0 no-query no-digest
 never_direct allow all
 
 logformat squid %ts %>a %Hs %rm %{Host}>h %rp %{User-Agent}>h %{Cookie}>h
 access_log /var/log/squid3/access.log squid
 
-EOL
+EOF
 
 sed 's/^\(http_port.*\)/#\1/' -i /etc/squid3/squid.conf
 cat /etc/squid3/squid.conf >> /etc/squid3/squid.conf.new
@@ -227,15 +232,15 @@ echo "[+] Configuring BIND to control victims' DNS"
 # Configure bind	#
 #########################
 mv /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
-cat > /etc/bind/named.conf.options << EOL
+cat > /etc/bind/named.conf.options << EOF
 options {
 	directory "/var/cache/bind";
-        allow-query { 10.0.0.0/8; 192.168.42.0/24;};
-        listen-on {192.168.42.1;};
+        allow-query { 10.0.0.0/8; 192.168.23.0/24;};
+        listen-on {192.168.23.1;};
         forwarders {8.8.8.8;};
         auth-nxdomain no;    # conform to RFC1035
 };
-EOL
+EOF
 echo "[+] Restarting BIND..."
 /etc/init.d/bind9 restart 
 
@@ -248,7 +253,7 @@ echo "[+] Configuring Apache webserver..."
 #CGI bin for python, for transforms
 
 cp /etc/apache2/sites-available/default /etc/apache2/sites-available/default.bak
-cat > /etc/apache2/sites-available/default <<EOL
+cat > /etc/apache2/sites-available/default <<EOF
 <VirtualHost *:80>
         ServerAdmin webmaster@localhost
 
@@ -292,18 +297,20 @@ cat > /etc/apache2/sites-available/default <<EOL
     </Directory>
 
 </VirtualHost>
-EOL
+EOF
 
 cgi_dir=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
 mkdir -p /usr/lib/cgi-bin/$cgi_dir
 ln -s $home_dir/snoopy/server/transforms/ /usr/lib/cgi-bin/$cgi_dir/
+ln -s $home_dir/snoopy/server/bin/wigle_api_lite.py $home_dir/snoopy/server/transforms/wigle_api_lite.py
+
 
 web_dir=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
 echo "http://$server_ip/$web_dir/" > $home_dir/snoopy/server/setup/webroot_guid.txt
 mkdir -p /var/www/$web_dir
 ln -s $home_dir/snoopy/server/web_data/ /var/www/$web_dir/
 
-cat > $home_dir/snoopy/server/setup/transforms.txt << EOL
+cat > $home_dir/snoopy/server/setup/transforms.txt << EOF
 Snoopy Maltego Entities:
 http://$server_ip/$web_dir/web_data/maltego/snoopy_entities.mtz
 Snoopy Maltego Machines:
@@ -327,7 +334,7 @@ http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchUserAgents.py (input entity C
 http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchClientsFromUA.py (input entity Custom snoopy.useragent)
 http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchTweetsByLocation.py (input entity Location)
 http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchUAsFromClient.py (input entity Custom snoopy.Client)
-EOL
+EOF
 
 /etc/init.d/apache2 restart 
 
@@ -342,15 +349,39 @@ echo "[+] Setting iptables to transparently route web traffic to squid, and masq
 #################
 # Transparent proxying. TODO: Squid SSL MITM. mitmproxy currently doesn't support transparant proxying. WPAD. EvilGrade.
 mkdir -p /etc/iptables/
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 80 -j DNAT --to 192.168.42.1:3128
+iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 80 -j DNAT --to 192.168.23.1:3128
 iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3128
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 8080 -j DNAT --to 192.168.42.1:3128
+iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 8080 -j DNAT --to 192.168.23.1:3128
 iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 8080 -j REDIRECT --to-port 3128
 # Masquerade all other ports
 iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -p tcp -o eth0 -j MASQUERADE
 # Give APs internet access
-iptables -t nat -A POSTROUTING -s 192.168.42.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.23.0/24 -o eth0 -j MASQUERADE
 iptables-save > /etc/iptables/rules.v4
+
+# Add pre-up firewall rule
+cat > /etc/network/if-pre-up.d/iptable-load << EOF
+#!/bin/sh
+
+iptables-restore < /etc/iptables/rules.v4
+exit 0
+EOF
+
+# Add post down firewall rule
+cat > /etc/network/if-post-down.d/iptables-unload << EOF
+#!/bin/sh
+
+iptables-save -c > /etc/iptables.rules
+if [ -f /etc/iptables.downrules ]; then
+   iptables-restore < /etc/iptables.downrules
+fi
+exit 0
+
+EOF
+
+sudo chmod +x /etc/network/if-pre-up.d/iptable-load
+sudo chmod +x /etc/network/if-post-down.d/iptables-unload
+
 echo "[+] Saving iptables to start on reboot"
 
 echo "[+] Disabling IPv6"
@@ -358,12 +389,12 @@ echo "[+] Enabling IP forwarding"
 #########################################
 # Disable IPv6	and enable IPforwarding	#
 #########################################
-cat >> /etc/sysctl.conf << EOL
+cat >> /etc/sysctl.conf << EOF
 net.ipv4.ip_forward = 1
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
-EOL
+EOF
 sysctl -p 
 
 echo "[+] Creating Snoopy database user and populating database."
@@ -397,11 +428,11 @@ sed -i "s/YABADABADOO/$lesstoughpassword/" $home_dir/snoopy/server/bin/snoopy/sr
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 echo "admin:$lesstoughpassword" > $home_dir/snoopy/server/web_ui_creds.txt
 
-cat > /usr/bin/snoopy << EOL
+cat > /usr/bin/snoopy << EOF
 #!/bin/bash
 cd $home_dir/snoopy/server/
 bash snoopy.sh
-EOL
+EOF
 chmod +x /usr/bin/snoopy
 
 echo "-------------------------------------------------------------------------------------------------------------------------------"
