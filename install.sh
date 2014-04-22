@@ -6,6 +6,11 @@
 # tested on Ubuntu 32bit 12.04 LTS Server. Read through it carefully if you're not installing on a 
 # fresh box that you don't mind breaking.
 
+## need to add this to setup before installing the pip packages
+## sudo apt-get install build-essential libssl-dev libffi-dev
+##
+## also need to add ez_setup.py to the snoopy and run it before running pip
+
 clear
 echo -en "
 +-----------------------------------------------------------------------------------------------+
