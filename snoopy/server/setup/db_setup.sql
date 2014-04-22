@@ -124,7 +124,7 @@ CREATE TABLE snoopy_user (
   UNIQUE KEY name (name)
 );
 
-CREATE VIEW get_fb_from_squid AS SELECT SUBSTRING(cookies,7+(SELECT LOCATE("c_user",cookies)),(SELECT (LOCATE(";",cookies, (SELECT LOCATE("c_user",cookies)))) -(SELECT LOCATE("c_user",cookies)+7))) as c_user, cookies,client_ip FROM squid_logs WHERE cookies LIKE '%c_user%' GROUP BY c_user;
+CREATE VIEW get_fb_from_squid AS SELECT SUBSTRING(cookies,7+(SELECT LOCATE("__user",cookies)),(SELECT (LOCATE("&",cookies, (SELECT LOCATE("__user",cookies)))) -(SELECT LOCATE("__user",cookies)+7))) as c_user, cookies,client_ip FROM squid_logs WHERE cookies LIKE '%__user%' GROUP BY c_user;
 
 CREATE VIEW snoopy_web_logs AS
 SELECT DISTINCT id AS drone_id,mac,squid_logs.client_ip,hostname AS client_hostname,domain,host,url,ua,cookies,timestamp

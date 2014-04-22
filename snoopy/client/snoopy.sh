@@ -43,6 +43,9 @@ cd $snoopyDir
 source $snoopyDir/configs/config
 save_path=$snoopyDir/snoopy_data/$device_id
 
+## samnco: bad hack to make sure there is no udhcpd 
+killall -9 udhcpd
+
 #Procs for probesniff
 t_pid=313373133
 g_pid=313373133
@@ -110,11 +113,12 @@ function check_tubes {
 
 # n900 has some special requirements/limitations
 n900_sniff(){
-	tshark -q -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+	tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 	t_pid=$!
 }
 linux_sniff(){
-	tshark -q -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+	# Here remove the -q that removes all logs?!
+	tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 	t_pid=$!
 }
 
@@ -151,11 +155,11 @@ run_id=`date +%s`"_"$RANDOM
 mkdir -p ~/.tmp/
 
 if [[ "$arch" == "n900" ]]; then
-                tshark -q -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+                tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 
         elif [[ "$arch" == "linux" ]]; then
 		
-                tshark -q -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+                tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
         fi
         t_pid=$!
 	echo "[+] Client probe requests can be viewed via 'tail -f $save_path/probe_data.txt'"
@@ -182,7 +186,7 @@ o_pid=$!
 
 until ifconfig | grep -q "tap0"; do sleep 2; done
 echo [+] VPN interface seems to be up. Checking connectivity..
-until ping -c 1 192.168.42.1>/dev/null; do sleep 3; done
+until ping -c 1 192.168.23.1>/dev/null; do sleep 3; done
 echo [+] Connectivity to VPN server connection is savy. Testing Internet via VPN..
 until ping -c 1 8.8.8.8>/dev/null; do sleep 3; done
 echo [+] Connectivity beyond VPN server connection is savy. Let\'s rock.
@@ -428,6 +432,11 @@ function unload_n900 {
 # Rsync	
 function sync {
 	key=$snoopyDir/configs/ssh/id_rsa
+
+	# Remove empty listing from probe_data.txt
+	sed -i '/\,\,/d' $snoopyDir/snoopy_data/probe_data.txt
+	sed -i '/\\x0/d' $snoopyDir/snoopy_data/probe_data.txt
+	
 	# Backgrounded
 	# Will including $snoopyDir variable disable ability to specify absolute commands restricting rsync?
 	while [ -r /tmp/snoopy_go ]; do rsync -e "ssh -i $key -o StrictHostKeyChecking=no" -rzt $snoopyDir/snoopy_data/ $sync_user@$sync_server:$upload_path &> /dev/null; sleep $delay_between_syncs; done &

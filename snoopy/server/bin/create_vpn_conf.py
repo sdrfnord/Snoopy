@@ -103,8 +103,8 @@ if device_type not in supported:
 	exit(-1)
 
 # You probably shouldn't change anything from here
-vpn_server_tap="192.168.42.1"
-first_ip_tap="192.168.42.2"	#Increment on the least octet, giving /24
+vpn_server_tap="192.168.23.1"
+first_ip_tap="192.168.23.2"	#Increment on the least octet, giving /24
 first_ip_wifi="10.2.0.1"	#Increment on the second octet, giving /16
 
 ip_tap=""

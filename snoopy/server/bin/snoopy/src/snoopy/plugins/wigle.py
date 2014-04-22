@@ -10,7 +10,8 @@ def wigle(mac):
         query = session.query(db.Probe, db.Wigle).\
                     filter(
                         db.Probe.device_mac == mac,
-                        db.Probe.probe_ssid == db.Wigle.ssid
+                    ).filter(
+                        db.Probe.probe_ssid == db.Wigle.ssid,
                     ).\
                     group_by(db.Probe.device_mac, db.Probe.probe_ssid).\
                     order_by(db.Probe.timestamp)
