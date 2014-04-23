@@ -8,6 +8,9 @@
                                                    V0.1  
     "Amy, technology isn't intrinsically good or evil. It's how it's used. Like the Death Ray."
     -Professor Farnsworth
+    
+    
+    Molotof edit : fully functional as of 4/22/14
 
 Welcome to Snoopy; a distributed tracking and profiling framework. Snoopy is a work in progress, so please feel free to submit suggestions and/or corrections. This document outlines basic usage. To understand the background a little more, have a look at the following:
 
