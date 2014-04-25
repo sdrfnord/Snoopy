@@ -96,6 +96,7 @@ c. The Web Interface
 --------------------
 Walter wrote a web interface for Snoopy. It can be accessed from http://your-snoopy-server.com:5000/
 
+The user name for the web interface is admin, and the password is the randomly generated password after the install finishes, also can be found in the snoopy server directory in a file (need to put exact location)
 d. Maltego Transforms
 ----------------------
 Several Maltego transforms exist to graphically explore collected data (see below for more info).
