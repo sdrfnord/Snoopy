@@ -118,7 +118,7 @@ if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 echo "[+] Installing required packages..."
 sleep 3
 
-apt-get install -y build-essential libssl-dev libffi-dev python-pip gcc libxml2-dev libxslt-dev python2.7-dev mysql-server squid3 openvpn bind9 tshark python-mysqldb apache2 python-beaker python-flask python-jinja2 python-mysqldb python-sqlalchemy python-werkzeug python-httplib2 # added build-essential libssl-dev libffi-dev and python-httplib2
+apt-get install -y build-essential libssl-dev libffi-dev python-pip gcc libxml2-dev libxslt-dev python2.7-dev mysql-server squid3 openvpn bind9 tshark python-mysqldb apache2 python-beaker python-flask python-jinja2 python-mysqldb python-sqlalchemy python-werkzeug python-httplib2 openssh-server # added build-essential libssl-dev libffi-dev and python-httplib2
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 if [ "$xplico" == "yes" ]; then
 	apt-get install -y xplico 
