@@ -30,11 +30,11 @@ The client side software runs on what we call "Drones". A Drone can be any Linux
 1. Collect Probe SSIDs from nearby wireless devices
 2. Offer a Rogue Access Point for nearby wireless devices to connect to
 
-Collected probe requests (e.g. Bob's iPhone looking for BTHomeHub-4123) are uploaded to the Snoopy server at regular intervals. All devices that associate to the Rogue AP have have their Internet served via the Snoopy Server.
+Collected probe requests (e.g. Bob's iPhone looking for BTHomeHub-4123) are uploaded to the Snoopy server at regular intervals. All devices that associate to the Rogue AP have their Internet served via the Snoopy Server.
 
 b. Server Software
 -------------------
-The server populates all probe requests into a database, and uses Wigle to determine GPS coordinates, and Google Maps to determine street addresses (and street view photographs). This means that if you're probing for your home network, I may get a photograph of your house.
+The server populates all probe requests into a database, and uses [Wigle][] to determine GPS coordinates, and [Google Maps][] to determine street addresses (and street view photographs). This means that if you're probing for your home network, I may get a photograph of your house.
 
 Each Drone connects to the server over OpenVPN, and has its own subnet. Associated clients receive an IP address from the Drone, and route traffic via it. This means that on the server we can match client IP addresses (and therefore MAC addresses) to internet activity.
 
@@ -130,23 +130,28 @@ Once installation is finished you should just be able to type 'snoopy' for the s
         [?] Help
 
 1. Creating drone packs
-Option [3] in the menu will allow you to create client side 'packs' for your Drone devices. Each Drone gets its own OpenVPN and SSH keys, DHCP ranges, and routing tables. You will be provided with a download URL per Drone device. Make sure your server and drone have their time set correctly or the VPN connection will not establish.
+
+   Option [3] in the menu will allow you to create client side 'packs' for your Drone devices. Each Drone gets its own OpenVPN and SSH keys, DHCP ranges, and routing tables. You will be provided with a download URL per Drone device. Make sure your server and drone have their time set correctly or the VPN connection will not establish.
 
 2. Installing and Running Snoopy on the Drone
-You may have up to 100 drones (if you want more, check the source or email me, there's no actual limitation). Installation consists of downloading the configuration pack from the previous step, and running the relevant setup script. For the Nokia N900 an icon will be placed on your Desktop. e.g.:
+
+   You may have up to 100 drones (if you want more, check the source or email me, there's no actual limitation). Installation consists of downloading the configuration pack from the previous step, and running the relevant setup script. For the Nokia N900 an icon will be placed on your Desktop. e.g.:
 
         haxor@drone001# wget http://snoopy-server.com/secretdir/drone001.tar.gz
         haxor@drone001# tar xzvf drone001.tar.gz
         haxor@drone001# cd snoopy && ./setup_n900.sh
 
 3. Looking up SSID Locations
-Create an account on www.wigle.net, and set your credentials via 'Configure server options'
+
+   Create an account on [Wigle][], and set your credentials via 'Configure server options'.
 
 4. Web Interface
-You can access the web inteface via http://your-snoopy-server:5000/. You can write your own plugins to traverse and display data. Walter's made is easy for you (check the appendix to this document).
+
+   You can access the web interface via http://your-snoopy-server.com:5000/. You can write your own plugins to traverse and display data. Walter's made is easy for you (check the appendix to this document).
 
 5. Exploring Data with Maltego
-In the Snoopy server menu go to 'Configure Server Options' > 'Maltego'. Here you will see URLs for downloading Snoopy entities, machines, and URLs for transforms. In order to use Maltego transforms you will need to:
+
+   In the Snoopy server menu go to 'Configure Server Options' > 'Maltego'. Here you will see URLs for downloading Snoopy entities, machines, and URLs for transforms. In order to use Maltego transforms you will need to:
      - Add Snoopy entities to Maltego
      - Create an account on http://cetas.paterva.com/TDS/
      - Login to cetas.paterva.com/TDS/
@@ -198,7 +203,7 @@ There are lots of thing still to be done / added. This version is rather PoC.
 8. CONTACT
 ==============
 The code was written by Glenn (with the exception of Walter's web interface). You can
-email him via glenn@sensepost.com or bug^H^H^H follow him on Twitter: @glennzw. Glenn's not a developer, and apologies for his poor code. He's a hacker, and this tool let him hack you.
+email him via glenn@sensepost.com or follow him on Twitter: @glennzw. Glenn's not a developer, and apologies for his poor code. He's a hacker, and this tool lets him hack you.
 
 Acknowledgements
 -----------------
@@ -223,12 +228,12 @@ A. Deploy Snoopy drones at Heathrow, Hilton, and Luton. The 'CommonLocation' Mal
 transform will note the intersection of all devices present at those three locations.
 Hopefully only one result - our human target.
 Once discovered, we can examine Google maps and street view photographs of where our
-spy has travelled to. His identify could be revealed if his device(s) are tricked into
+spy has traveled to. His identity could be revealed if his device(s) are tricked into
 connecting to the Snoopy rogue access point (such as his Facebook, Twitter, or email).
 
 Identifying Undesirables
 -------------------
-Ask Snoopy to note all individuals who have connected to a WiFi spot in certain sandy^W
+Ask Snoopy to note all individuals who have connected to a WiFi spot in certain sandy
 undesirable countries.
 
 Tracking Customers
@@ -259,7 +264,7 @@ For the N900, you will notice that the loading of injection drivers severely red
 the battery life. The [TecNet 6600mAh](http://is.gd/pQz9X2) battery pack gave around 6-8 hours in testing. You will, however, need an [adapter](http://is.gd/Mavr11) to plug the N900 into any battery pack. Reducing (or disabling) the GPS polling frequency will also better serve battery life.
 
 Tips on connecting your N900 to your laptop via USB (for the purpose of SSH) can be
-found [here](http://wiki.maemo.org/N900_USB_networking)
+found [here](http://wiki.maemo.org/N900_USB_networking).
 
 I'm currently testing on the RaspberryPi, Alfa R36 mini AP, and SheevaPlug. Results to
 follow.
@@ -367,3 +372,5 @@ changes. The client data (generated by the back-end plug-in) is given in the
 Since the data handler's only allowed output is changes to the given div
 (`$section`), no return value is necessary.
 
+[Wigle]: https://wigle.net/
+[Google Maps]: https://maps.google.de/
