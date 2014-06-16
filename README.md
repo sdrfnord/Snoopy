@@ -1,15 +1,15 @@
-     _______  __    _  _______  _______  _______  __   __ 
+     _______  __    _  _______  _______  _______  __   __
     |       ||  |  | ||       ||       ||       ||  | |  |
     |  _____||   |_| ||   _   ||   _   ||    _  ||  |_|  |
     | |_____ |       ||  | |  ||  | |  ||   |_| ||       |
     |_____  ||  _    ||  |_|  ||  |_|  ||    ___||_     _|
-     _____| || | |   ||       ||       ||   |      |   |  
+     _____| || | |   ||       ||       ||   |      |   |
     |_______||_|  |__||_______||_______||___|      |___|
-                                                   V0.1  
+                                                   V0.1
     "Amy, technology isn't intrinsically good or evil. It's how it's used. Like the Death Ray."
     -Professor Farnsworth
-    
-    
+
+
     Molotof edit : fully functional as of 4/22/14
 
 Welcome to Snoopy; a distributed tracking and profiling framework. Snoopy is a work in progress, so please feel free to submit suggestions and/or corrections. This document outlines basic usage. To understand the background a little more, have a look at the following:
@@ -72,23 +72,23 @@ The network diagram looks like so:
                                                                     |
                                                                     |
                                                                     |
-          Client3                       Drone2                      |      
+          Client3                       Drone2                      |
         +----------+            +-----------------------+           |
         |    wlan0-|<---WiFi--->|-at0                   |           |
         |          |    |       | 10.3.0.1              |           |
         | dhclient |    |       |                       |           |
         |          |    |       |                  tap0-|<-openvpn--+
-        +----------+    |       |          192.168.23.3 |       
-        10.3.0.2        |       +-----------------------+       
+        +----------+    |       |          192.168.23.3 |
+        10.3.0.2        |       +-----------------------+
                         |
-                        |       
                         |
-          Client4       |                                       
-        +----------+    |                                       
-        |    wlan0-|<---+                                       
-        |          |                                            
-        | dhclient |                                            
-        |          |                                            
+                        |
+          Client4       |
+        +----------+    |
+        |    wlan0-|<---+
+        |          |
+        | dhclient |
+        |          |
         +----------+
         10.3.0.3
 
@@ -151,12 +151,12 @@ You can access the web inteface via http://your-snoopy-server:5000/. You can wri
 
 5. Exploring Data with Maltego
 In the Snoopy server menu go to 'Configure Server Options' > 'Maltego'. Here you will see URLs for downloading Snoopy entities, machines, and URLs for transforms. In order to use Maltego transforms you will need to:
-     - Add Snoopy entities to Maltego 
+     - Add Snoopy entities to Maltego
      - Create an account on http://cetas.paterva.com/TDS/
      - Login to cetas.paterva.com/TDS/
      - Create a seed on cetas.paterva.com/TDS/
      - Add the transform URLs to the created seed
-     - Add the seed in Maltego (Manage > Discover Transforms (Advanced) 
+     - Add the seed in Maltego (Manage > Discover Transforms (Advanced)
      - Enter the name as 'Snoopy', and the seed URL as your seed
      - Add the Snoopy machines to the machines section
 
@@ -167,7 +167,7 @@ The Snoopy machines allow you to automatically sequence transforms, and filter/d
 
 4. LEGAL CONSIDERATIONS
 =======================
-All or some of the Snoopy components may be illegal where you live. Please find out before using the software. In the United Kingdom the probe collection component is legal due to the broadcast nature of the traffic. However, the rogue access point component is most likely illegal in most regions. SensePost takes no responsibility for you getting into trouble from using this tool. 
+All or some of the Snoopy components may be illegal where you live. Please find out before using the software. In the United Kingdom the probe collection component is legal due to the broadcast nature of the traffic. However, the rogue access point component is most likely illegal in most regions. SensePost takes no responsibility for you getting into trouble from using this tool.
 
 5. SECURITY CONSIDERATIONS
 ==========================
@@ -180,7 +180,7 @@ following automatically added to the *.ssh/authorized_hosts file*, for a little 
 
 6. FUTURE WORK
 ===============
-There are lots of thing still to be done / added. This version is rather PoC. 
+There are lots of thing still to be done / added. This version is rather PoC.
 
 - Integrate ToR support
 - Add filters to easily add other traffic captures (e.g. mDNS)
@@ -220,7 +220,7 @@ Catching the Spy
 ----------------
 Q. We know that a foreign spy arrives at Heathrow on the 11th November, but we don't know
 when or on which flight. Our intel suggests he will stay at the Hilton after arriving,
-and catch a flight from Luton airport on the 14th (again we don't know what time or 
+and catch a flight from Luton airport on the 14th (again we don't know what time or
 destination). He is a master of disguise. How can we identify him?
 
 A. Deploy Snoopy drones at Heathrow, Hilton, and Luton. The 'CommonLocation' Maltego
@@ -284,7 +284,7 @@ APPENDIX A4. SNOOPY WEB INTERFACE SCRIPTING
 ---------------------------------------------------------------------------------------
 
 # Introduction
-The web ui code is accessible via 
+The web ui code is accessible via
 ~user/snoopy/server/bin/snoopy/src/snoopy/
 
 # Requirements (already installed)
