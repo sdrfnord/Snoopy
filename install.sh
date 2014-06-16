@@ -13,6 +13,11 @@
 ## after this install finishes with no problems but then wigle api gives an error so I installed
 ## python-httplib2 and now I can query the api fine, but then I am now stuck with mysql auth error.
 
+## Exit on error
+set -e
+
+## Script dependecies as apt package:
+apt_packages_script_dependecies='pwgen'
 
 
 clear
@@ -50,6 +55,7 @@ echo -en "
 
 read foo
 xplico=no #Set to yes to install xplico. ToDo Incorporate xplico database into Snoopy.
+rogue_ap=no
 
 echo -n "[+] Let's create a Snoopy account. Please enter a name (enter for default 'woodstock'): "
 read user
@@ -57,26 +63,17 @@ user="${user:=woodstock}"
 
 ## Samnco: To do better management of user creation (manage existing users)
 useradd -c "Snoopy Account" -m $user
-if [ "$?" -ne 0 ]; then
-        echo "[!] Failed to create user $user :("
-        exit 1
-fi
 home_dir=$(getent passwd $user | cut -d: -f6)
 echo "[+] Copying files to '$home_dir/snoopy'"
-cp -R snoopy $home_dir/
-cp LICENSE.txt README.txt $home_dir/snoopy/
+cp -R snoopy "$home_dir/"
+cp LICENSE.txt README.txt "$home_dir/snoopy/"
 #tar xzf snoopy_install_files.tar.gz -C $home_dir
-chown -R $user: $home_dir/snoopy
-if [ "$?" -ne 0 ]; then
-        echo "[!] Failed to extract files :("
-        exit 1
-fi
+chown -R $user: "$home_dir/snoopy"
 
-cd $home_dir/snoopy/server/
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+cd "$home_dir/snoopy/server/"
 su - $user -c "mkdir -p $home_dir/snoopy/server/uploads"
 su - $user -c "mkdir -p $home_dir/snoopy/server/client_configs"
-echo "[+] Creating ssh keys for $user.."
+echo "[+] Creating ssh keys for $user ..."
 su - $user -c "ssh-keygen -f $home_dir/.ssh/id_rsa -N ''"
 su - $user -c "touch $home_dir/.ssh/authorized_keys"
 sed -i "s/^rsync_user=.*/rsync_user=\"$user\"/" ./setup/config
@@ -107,60 +104,61 @@ fi
 if [ "$xplico" == "yes" ]; then
 	echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" >> /etc/apt/sources.list
 	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE &
-	if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 fi
 
 echo "[+] Updating repositories..."
 sleep 3
 apt-get update
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 
 echo "[+] Installing required packages..."
 sleep 3
 
-apt-get install -y build-essential libssl-dev libffi-dev python-pip gcc libxml2-dev libxslt-dev python2.7-dev mysql-server squid3 openvpn bind9 tshark python-mysqldb apache2 python-beaker python-flask python-jinja2 python-mysqldb python-sqlalchemy python-werkzeug python-httplib2 openssh-server # added build-essential libssl-dev libffi-dev and python-httplib2
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+apt_packages_rougue_ap="squid3 openvpn bind9 "
+apt-get install -y build-essential libssl-dev libffi-dev python-pip gcc libxml2-dev libxslt-dev python2.7-dev mysql-server tshark python-mysqldb apache2 python-beaker python-flask python-jinja2 python-mysqldb python-sqlalchemy python-werkzeug python-httplib2 openssh-server mitmproxy python-ipaddr python-publicsuffix python-beautifulsoup python-pil etckeeper
+if [ "$rogue_ap" == "yes" ]; then
+	apt-get install -y $apt_packages_rougue_ap
+fi
 if [ "$xplico" == "yes" ]; then
 	apt-get install -y xplico
 fi
 python ez_setup.py #maybe this will make it work
-pip install lxml beautifulsoup  PIL mitmproxy ipaddr publicsuffix twisted cryptacular Flask_SQLAlchemy
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+pip install lxml twisted cryptacular Flask_SQLAlchemy
+# PIL
 
 pip install requests==0.14
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 
 echo "[+] Done installing packages. Onward and upward!"
-echo "[+] Building OpenVPN certificates..."
-sleep 1
+if [ "$rogue_ap" == "yes" ]; then
+    echo "[+] Building OpenVPN certificates..."
+    sleep 1
 
-#################
-#OpenVPN	#
-#################
-rm -rf /etc/openvpn/easy-rsa/ /etc/openvpn/ccd/
-mkdir -p /etc/openvpn/easy-rsa/
-mkdir -p /etc/openvpn/ccd/
-#mkdir /etc/openvpn/packs/
-cp -R /usr/share/doc/openvpn/examples/easy-rsa/2.0/* /etc/openvpn/easy-rsa/
-cd /etc/openvpn/easy-rsa/
-ln -s openssl-1.0.0.cnf openssl.cnf
-source ./vars
-./clean-all
-echo "    Creating server CA"
-./pkitool --initca
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-echo "    Generating keys "
-./pkitool --server server
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-echo "    Generating DH parameters (this may take some time)"
-./build-dh
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-cd $home_dir/snoopy/server/
+    #################
+    #OpenVPN	#
+    #################
+    rm -rf /etc/openvpn/easy-rsa/ /etc/openvpn/ccd/
+    mkdir -p /etc/openvpn/easy-rsa/
+    mkdir -p /etc/openvpn/ccd/
+    #mkdir /etc/openvpn/packs/
+    cp -R /usr/share/doc/openvpn/examples/easy-rsa/2.0/* /etc/openvpn/easy-rsa/
+    cd /etc/openvpn/easy-rsa/
+    ln -s openssl-1.0.0.cnf openssl.cnf
+    source ./vars
+    ./clean-all
+    echo "    Creating server CA"
+    ./pkitool --initca
+    if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+    echo "    Generating keys "
+    ./pkitool --server server
+    if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+    echo "    Generating DH parameters (this may take some time)"
+    ./build-dh
+    if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+    cd $home_dir/snoopy/server/
 
-echo "[+] Creating Snoopy Server OpenVPN configuration file"
+    echo "[+] Creating Snoopy Server OpenVPN configuration file"
 
-#tap0 is required to bind dhcp3-server to the server interface, a
-# work in progress to allow a central DHCP server.
+    #tap0 is required to bind dhcp3-server to the server interface, a
+    # work in progress to allow a central DHCP server.
 
 cat > /etc/openvpn/openvpn.conf << EOF
 local $server_ip
@@ -188,28 +186,28 @@ log-append /var/log/openvpn
 comp-lzo
 script-security 3
 up "/usr/bin/snoopy_routes.sh"
-
 EOF
 
-echo "[+] Adding routes for 'Server<---Drone--->Victim' communication"
-#Routes for VPN, figure out how to do this properly
-echo '#!/bin/bash
-for i in {2..100}; do ip route add 10.$i.0.0/16 via 192.168.23.$i; done' > /usr/bin/snoopy_routes.sh
-chmod +x /usr/bin/snoopy_routes.sh
-/etc/init.d/openvpn start
-# For each client, the create_vpn_config.py script will
-# do './pkitool clientname'
+    echo "[+] Adding routes for 'Server<---Drone--->Victim' communication"
+    #Routes for VPN, figure out how to do this properly
+    echo '#!/bin/bash
+    for i in {2..100}; do ip route add 10.$i.0.0/16 via 192.168.23.$i; done' > /usr/bin/snoopy_routes.sh
+    chmod +x /usr/bin/snoopy_routes.sh
+    /etc/init.d/openvpn start
+    # For each client, the create_vpn_config.py script will
+    # do './pkitool clientname'
 
 
-echo "[+] Configurating squid proxy with custom logging..."
-#########################
-# Update squid3.conf	#
-#########################
-#TODO: Figure out how to send logs directly to MySQL. I almost had it working, but fell back to
-#	parsing a text file (with pytail.py)
-rm /etc/logrotate.d/squid3 &	#Disable log rotation
-ln -s /var/log/squid3/access.log $home_dir/snoopy/server/uploads/squid_logs.txt
-cp /etc/squid3/squid.conf /etc/squid3/squid.conf.bak
+    echo "[+] Configurating squid proxy with custom logging..."
+    #########################
+    # Update squid3.conf	#
+    #########################
+    #TODO: Figure out how to send logs directly to MySQL. I almost had it working, but fell back to
+    #	parsing a text file (with pytail.py)
+    rm /etc/logrotate.d/squid3 &	#Disable log rotation
+    ln -s /var/log/squid3/access.log $home_dir/snoopy/server/uploads/squid_logs.txt
+    cp /etc/squid3/squid.conf /etc/squid3/squid.conf.bak
+
 cat > /etc/squid3/squid.conf.new << EOF
 http_port 192.168.23.1:3128 transparent
 acl vpn src 10.0.0.0/8
@@ -220,22 +218,22 @@ never_direct allow all
 
 logformat squid %ts %>a %Hs %rm %{Host}>h %rp %{User-Agent}>h %{Cookie}>h
 access_log /var/log/squid3/access.log squid
-
 EOF
 
-sed 's/^\(http_port.*\)/#\1/' -i /etc/squid3/squid.conf
-cat /etc/squid3/squid.conf >> /etc/squid3/squid.conf.new
-mv /etc/squid3/squid.conf.new /etc/squid3/squid.conf
+    sed 's/^\(http_port.*\)/#\1/' -i /etc/squid3/squid.conf
+    cat /etc/squid3/squid.conf >> /etc/squid3/squid.conf.new
+    mv /etc/squid3/squid.conf.new /etc/squid3/squid.conf
 
-echo "[+] Restarting squid"
-/etc/init.d/squid3 restart
+    echo "[+] Restarting squid"
+    /etc/init.d/squid3 restart
 
 
-echo "[+] Configuring BIND to control victims' DNS"
-#########################
-# Configure bind	#
-#########################
-mv /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+    echo "[+] Configuring BIND to control victims' DNS"
+    #########################
+    # Configure bind	#
+    #########################
+    mv /etc/bind/named.conf.options /etc/bind/named.conf.options.bak
+
 cat > /etc/bind/named.conf.options << EOF
 options {
 	directory "/var/cache/bind";
@@ -245,18 +243,20 @@ options {
         auth-nxdomain no;    # conform to RFC1035
 };
 EOF
-echo "[+] Restarting BIND..."
-/etc/init.d/bind9 restart
 
-echo "[+] Configuring Apache webserver..."
-##################
-# Apache2	#
-#################
-#mkdir -p /var/www/drone_downloads/ #create_vpn_conf stores it's output here for users to download
+    echo "[+] Restarting BIND..."
+    /etc/init.d/bind9 restart
 
-#CGI bin for python, for transforms
+    echo "[+] Configuring Apache webserver..."
+    ##################
+    # Apache2	#
+    #################
+    #mkdir -p /var/www/drone_downloads/ #create_vpn_conf stores it's output here for users to download
 
-cp /etc/apache2/sites-available/default /etc/apache2/sites-available/default.bak
+    #CGI bin for python, for transforms
+
+    cp /etc/apache2/sites-available/default /etc/apache2/sites-available/default.bak
+
 cat > /etc/apache2/sites-available/default <<EOF
 <VirtualHost *:80>
         ServerAdmin webmaster@localhost
@@ -303,16 +303,15 @@ cat > /etc/apache2/sites-available/default <<EOF
 </VirtualHost>
 EOF
 
-cgi_dir=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
-mkdir -p /usr/lib/cgi-bin/$cgi_dir
-ln -s $home_dir/snoopy/server/transforms/ /usr/lib/cgi-bin/$cgi_dir/
-ln -s $home_dir/snoopy/server/bin/wigle_api_lite.py $home_dir/snoopy/server/transforms/wigle_api_lite.py
+    cgi_dir="/usr/lib/cgi-bin/$(cat /proc/sys/kernel/random/uuid)"
+    mkdir -p "$cgi_dir"
+    ln -s $home_dir/snoopy/server/transforms/ "$cgi_dir/"
+    ln -s $home_dir/snoopy/server/bin/wigle_api_lite.py $home_dir/snoopy/server/transforms/wigle_api_lite.py
 
-
-web_dir=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
-echo "http://$server_ip/$web_dir/" > $home_dir/snoopy/server/setup/webroot_guid.txt
-mkdir -p /var/www/$web_dir
-ln -s $home_dir/snoopy/server/web_data/ /var/www/$web_dir/
+    web_dir="/var/www/$(cat /proc/sys/kernel/random/uuid)"
+    echo "http://$server_ip/$web_dir/" > $home_dir/snoopy/server/setup/webroot_guid.txt
+    mkdir -p "$web_dir"
+    ln -s $home_dir/snoopy/server/web_data/ "$web_dir/"
 
 cat > $home_dir/snoopy/server/setup/transforms.txt << EOF
 Snoopy Maltego Entities:
@@ -340,30 +339,30 @@ http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchTweetsByLocation.py (input en
 http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchUAsFromClient.py (input entity Custom snoopy.Client)
 EOF
 
-/etc/init.d/apache2 restart
+    /etc/init.d/apache2 restart
 
-if [ "$xplico" == "yes" ]; then
-	echo "[+] Configuring xplico"
-	/opt/xplico/script/session_mng.pyc -n "Snoopy" "Data Intercepted"
-fi
+    if [ "$xplico" == "yes" ]; then
+        echo "[+] Configuring xplico"
+        /opt/xplico/script/session_mng.pyc -n "Snoopy" "Data Intercepted"
+    fi
 
-echo "[+] Setting iptables to transparently route web traffic to squid, and masquerade other."
-#################
-# iptables	#
-#################
-# Transparent proxying. TODO: Squid SSL MITM. mitmproxy currently doesn't support transparant proxying. WPAD. EvilGrade.
-mkdir -p /etc/iptables/
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 80 -j DNAT --to 192.168.23.1:3128
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3128
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 8080 -j DNAT --to 192.168.23.1:3128
-iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 8080 -j REDIRECT --to-port 3128
-# Masquerade all other ports
-iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -p tcp -o eth0 -j MASQUERADE
-# Give APs internet access
-iptables -t nat -A POSTROUTING -s 192.168.23.0/24 -o eth0 -j MASQUERADE
-iptables-save > /etc/iptables/rules.v4
+    echo "[+] Setting iptables to transparently route web traffic to squid, and masquerade other."
+    #################
+    # iptables	#
+    #################
+    # Transparent proxying. TODO: Squid SSL MITM. mitmproxy currently doesn't support transparant proxying. WPAD. EvilGrade.
+    mkdir -p /etc/iptables/
+    iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 80 -j DNAT --to 192.168.23.1:3128
+    iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 3128
+    iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i tap0 -p tcp --dport 8080 -j DNAT --to 192.168.23.1:3128
+    iptables -t nat -A PREROUTING -s 10.0.0.0/8 -i eth0 -p tcp --dport 8080 -j REDIRECT --to-port 3128
+    # Masquerade all other ports
+    iptables -t nat -A POSTROUTING -s 10.0.0.0/8 -p tcp -o eth0 -j MASQUERADE
+    # Give APs internet access
+    iptables -t nat -A POSTROUTING -s 192.168.23.0/24 -o eth0 -j MASQUERADE
+    iptables-save > /etc/iptables/rules.v4
 
-# Add pre-up firewall rule
+    # Add pre-up firewall rule
 cat > /etc/network/if-pre-up.d/iptable-load << EOF
 #!/bin/sh
 
@@ -371,7 +370,7 @@ iptables-restore < /etc/iptables/rules.v4
 exit 0
 EOF
 
-# Add post down firewall rule
+    # Add post down firewall rule
 cat > /etc/network/if-post-down.d/iptables-unload << EOF
 #!/bin/sh
 
@@ -380,74 +379,64 @@ if [ -f /etc/iptables.downrules ]; then
    iptables-restore < /etc/iptables.downrules
 fi
 exit 0
-
 EOF
 
-sudo chmod +x /etc/network/if-pre-up.d/iptable-load
-sudo chmod +x /etc/network/if-post-down.d/iptables-unload
+    sudo chmod +x /etc/network/if-pre-up.d/iptable-load
+    sudo chmod +x /etc/network/if-post-down.d/iptables-unload
 
-echo "[+] Saving iptables to start on reboot"
+    echo "[+] Saving iptables to start on reboot"
 
-echo "[+] Disabling IPv6"
-echo "[+] Enabling IP forwarding"
-#########################################
-# Disable IPv6	and enable IPforwarding	#
-#########################################
-cat >> /etc/sysctl.conf << EOF
+    echo "[+] Disabling IPv6"
+    echo "[+] Enabling IP forwarding"
+    ########################################
+    # Disable IPv6 and enable IPforwarding #
+    ########################################
+cat > /etc/sysctl.d/snoppy.conf << EOF
 net.ipv4.ip_forward = 1
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 EOF
-sysctl -p
+    sysctl -p
 
-echo "[+] Creating Snoopy database user and populating database."
-#########################
-# Create database	#
-#########################
-stty -echo
-echo -n "    Enter your MySQL root password: "
-read mysqlpass
-stty echo
-echo ""
-toughpassword=$(head -1 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-132}|md5sum | sed 's/ .*//')
+    echo "[+] Creating Snoopy database user and populating database."
+    #########################
+    # Create database	#
+    #########################
+    stty -echo
+    echo -n "    Enter your MySQL root password: "
+    read mysqlpass
+    stty echo
+    echo ""
+    toughpassword=$(pwgen -s 33 1)
 
-sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/setup/db_setup.sql
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/bin/stawk_db.py
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/transforms/stawk_db.py
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/bin/snoopy/src/snoopy/db/__init__.py
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+    sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/setup/db_setup.sql
+    sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/bin/stawk_db.py
+    sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/transforms/stawk_db.py
+    sed -i "s/RANDOMPASSWORDGOESHERE/$toughpassword/" $home_dir/snoopy/server/bin/snoopy/src/snoopy/db/__init__.py
 
-mysql -u root -p$mysqlpass < $home_dir/snoopy/server/setup/db_setup.sql
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-mysql -u root -p$mysqlpass snoopy < $home_dir/snoopy/server/setup/mac_vendor.sql
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
+    mysql -u root -p$mysqlpass < $home_dir/snoopy/server/setup/db_setup.sql
+    mysql -u root -p$mysqlpass snoopy < $home_dir/snoopy/server/setup/mac_vendor.sql
 
-lesstoughpassword=$(head -100 /dev/urandom | tr -dc _A-Z-a-z-0-9 | head -c${1:-10})
-echo "[+] Setting web interface (http://$server_ip:5000/) password to '$lesstoughpassword' - maybe write that down."
-sed -i "s/YABADABADOO/$lesstoughpassword/" $home_dir/snoopy/server/bin/snoopy/src/snoopy/db/__init__.py
-if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
-echo "admin:$lesstoughpassword" > $home_dir/snoopy/server/web_ui_creds.txt
+    lesstoughpassword=$(pwgen 16 1)
+    echo "[+] Setting web interface (http://$server_ip:5000/) password to '$lesstoughpassword' - maybe write that down."
+    sed -i "s/YABADABADOO/$lesstoughpassword/" $home_dir/snoopy/server/bin/snoopy/src/snoopy/db/__init__.py
+    echo "admin:$lesstoughpassword" > $home_dir/snoopy/server/web_ui_creds.txt
 
 cat > /usr/bin/snoopy << EOF
 #!/bin/bash
 cd $home_dir/snoopy/server/
 bash snoopy.sh
 EOF
-chmod +x /usr/bin/snoopy
 
-echo "-------------------------------------------------------------------------------------------------------------------------------"
+    chmod +x /usr/bin/snoopy
 
-echo "    Snoopy installation done! You should run the command 'snoopy' now to load the server
-    menu. From there you can create some configuration packs to load on your Drones. Have fun,"
-echo "    be good, and learn!"
-echo ""
-echo "    Contact glenn@sensepost.com for questions/suggestions to do with Snoopy."
-echo ""
-echo "    http://www.sensepost.com/labs"
-echo "    research@sensepost.com"
+echo "-------------------------------------------------------------------------------------------------------------------------------
+    Snoopy installation done! You should run the command 'snoopy' now to load the server
+    menu. From there you can create some configuration packs to load on your Drones. Have fun,
+    be good, and learn!
 
+    Contact glenn@sensepost.com for questions/suggestions to do with Snoopy.
 
+    http://www.sensepost.com/labs
+    research@sensepost.com"
