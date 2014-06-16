@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# glenn@sensepost.com 
+# glenn@sensepost.com
 # Snoopy // 2012
 # By using this code you agree to abide by the supplied LICENSE.txt
 
@@ -29,24 +29,24 @@ class gps_fix:
 	def on_error(self,control, error, data):
 	    print "location error: %d... quitting" % error
 	    data.quit()
-	
+
 	def on_changed(self,device, data):
 	    if not device:
 	        return
-	
+
 	    #Uncomment line below to show progress...
-	    cacc= "#Accuracy: %f,%f,%f,%f,%f" %(time.time(),device.fix[4],device.fix[5],device.fix[6]/100,device.fix[11]) 
+	    cacc= "#Accuracy: %f,%f,%f,%f,%f" %(time.time(),device.fix[4],device.fix[5],device.fix[6]/100,device.fix[11])
 	    #print cacc
 	    #f.write(cacc)
 	    #f.write("\n")
 	    #f.flush()
-	   
+
 	    if not device.fix[6] == device.fix[6]:
 	        return
-	
+
 	    if device.fix[6] > acc:
 	        return
-	
+
 	    if device.fix:
 	        if device.fix[1] & location.GPS_DEVICE_LATLONG_SET:
 		    f=open(filename, "a")
@@ -59,28 +59,28 @@ class gps_fix:
 		    data.stop()
 		    #time.sleep(sleep_time)
 		    #data.start()
-	
+
 	def on_stop(self,control, data):
 	    data.quit()
 	    #pass
-	
+
 	def start_location(self,data):
 	    data.start()
 	    return False
-	
+
 	def __init__(self):
 		loop = gobject.MainLoop()
 		control = location.GPSDControl.get_default()
 		device = location.GPSDevice()
 		control.set_properties(preferred_method=location.METHOD_USER_SELECTED,
 		                       preferred_interval=location.INTERVAL_DEFAULT)
-		
+
 		control.connect("error-verbose", self.on_error, loop)
 		device.connect("changed", self.on_changed, control)
 		control.connect("gpsd-stopped", self.on_stop, loop)
-		
+
 		gobject.idle_add(self.start_location, control)
-		
+
 		loop.run()
 
 
@@ -99,7 +99,7 @@ lastPos=(0,0)
 while(1):
 	g = gps_fix()
 
-	#print lastPos[0],g.fix[0],lastPos[1],g.fix[1] 
+	#print lastPos[0],g.fix[0],lastPos[1],g.fix[1]
 	distanceMoved=haversine(lastPos[0],lastPos[1],g.fix[0],g.fix[1])
 	#print "Distance moved %f" %distanceMoved
 	if( distanceMoved < 100):

@@ -1,65 +1,65 @@
 #!/bin/bash
-# glenn@sensepost.com 
+# glenn@sensepost.com
 # Snoopy // 2012
 # By using this code you agree to abide by the supplied LICENSE.txt
 
 snoopyDir=$(cd $(dirname "$0"); pwd)
-cd $snoopyDir
+cd "$snoopyDir"
 
 source ./setup/config
 
 pid_1=313373133
 pid_2=313373133
 pid_3=313373133
-status=Checking...
-num_drones=Checking...
+status='Checking...'
+num_drones='Checking...'
 
-# Agressively terminate other stale instances
+# Aggressively terminate other stale instances
 killall mitmdump &> /dev/null
 for i in `ps a | grep 'python' | grep  'snoopy_server.py\|sslstrip.py' | grep -v grep| cut -d " " -f 2`; do kill -9 $i &> /dev/null; done
 clear
 
 function snoopy_start {
-	echo "[+] Stopping Snoopy (if it's running)"
-	snoopy_stop
-	echo "[+] Starting Snoopy..."
-#	/etc/init.d/squid3 restart
-	export PYTHONPATH=`pwd`/bin/snoopy/src/
-	python ./bin/snoopy_server.py `pwd` &
-	pid_1=$!
-	search_for=$(cat ./setup/replace_match.txt)
-	mitmdump -a 192.168.23.1 -p 3129 -P http://192.168.23.1:10000 "--replace-from-file=:~bs:$search_for:./setup/replace_html.txt" &>> /tmp/log.txt &
-	#mitmdump -a 192.168.23.1 -p 3129 -P http://192.168.23.1:10000 "--replace-from-file=:~bs:</body>:./setup/replace_html.txt" &>> /tmp/log.txt &
-	pid_2=$!
-	python ./bin/sslstripSnoopy/sslstrip.py -w ./uploads/sslstrip_snoopy.log &> /dev/null &
-	pid_3=$!
+    echo "[+] Stopping Snoopy (if it's running)"
+    snoopy_stop
+    echo "[+] Starting Snoopy..."
+    # /etc/init.d/squid3 restart
+    export PYTHONPATH=`pwd`/bin/snoopy/src/
+    python ./bin/snoopy_server.py `pwd` &
+    pid_1=$!
+    search_for=$(cat ./setup/replace_match.txt)
+    mitmdump -a 192.168.23.1 -p 3129 -P http://192.168.23.1:10000 "--replace-from-file=:~bs:$search_for:./setup/replace_html.txt" &>> /tmp/log.txt &
+    #mitmdump -a 192.168.23.1 -p 3129 -P http://192.168.23.1:10000 "--replace-from-file=:~bs:</body>:./setup/replace_html.txt" &>> /tmp/log.txt &
+    pid_2=$!
+    python ./bin/sslstripSnoopy/sslstrip.py -w ./uploads/sslstrip_snoopy.log &> /dev/null &
+    pid_3=$!
 
-	#sleep 5
+    #sleep 5
 }
 
 function snoopy_stop {
-	#/etc/init.d/squid3 stop
-	kill -2 $pid_1  &> /dev/null
-	kill -9 $pid_2  &> /dev/null
-	kill -9 $pid_3  &> /dev/null
-	kill -9 $p &> /dev/null #In case we're tailing logs (option 6)
-	#Just in case:
-	killall mitmdump &> /dev/null
-	for i in `ps a | grep 'python' | grep  'snoopy_server.py\|sslstrip.py' | grep -v grep| cut -d " " -f 2`; do kill -9 $i &> /dev/null; done
-	clear
+    #/etc/init.d/squid3 stop
+    kill -2 $pid_1  &> /dev/null
+    kill -9 $pid_2  &> /dev/null
+    kill -9 $pid_3  &> /dev/null
+    kill -9 $p &> /dev/null #In case we're tailing logs (option 6)
+    #Just in case:
+    killall mitmdump &> /dev/null
+    for i in `ps a | grep 'python' | grep  'snoopy_server.py\|sslstrip.py' | grep -v grep| cut -d " " -f 2`; do kill -9 $i &> /dev/null; done
+    clear
 }
 
 function watchdog {
-	kill -0 $pid_1 &> /dev/null;a=$?
-	kill -0 $pid_2 &> /dev/null;b=$?
-	kill -0 $pid_3 &> /dev/null;c=$?
-	if [ "$a" == "0" ] && [ "$b" == "0" ] && [ "$c" == "0" ];then
-		status="\E[32;1mRunning\E[0m"
-	else
-		status="\E[31;1mStopped\E[0m"
-	fi
+    kill -0 $pid_1 &> /dev/null;a=$?
+    kill -0 $pid_2 &> /dev/null;b=$?
+    kill -0 $pid_3 &> /dev/null;c=$?
+    if [ "$a" == "0" ] && [ "$b" == "0" ] && [ "$c" == "0" ];then
+        status="\E[32;1mRunning\E[0m"
+    else
+        status="\E[31;1mStopped\E[0m"
+    fi
 
-	num_drones='\E[1m'`python bin/vpn_drones.py| wc -l`'\E[0m'
+    num_drones='\E[1m'`python bin/vpn_drones.py| wc -l`'\E[0m'
 }
 
 function config_menu {
@@ -93,19 +93,19 @@ read -n 1 input
 #if [[ -z $input ]]; then
 #        config_menu
 #fi
-echo ""                 
+echo ""
 
 if [ "$input" == "1" ]; then
-		               
-		echo -n "Enter new lookback value in seconds (e.g. 300): "
-		read num 
-		expr $num + 1 2> /dev/null
-		if [ $? = 0 ]; then
-			sed -i "s/^lookback=.*/lookback=$num/" ./transforms/common.py
-		else
-			echo "Not valid number!"
-			sleep 1
-		fi
+
+    echo -n "Enter new lookback value in seconds (e.g. 300): "
+    read num
+    expr $num + 1 2> /dev/null
+    if [ $? = 0 ]; then
+        sed -i "s/^lookback=.*/lookback=$num/" ./transforms/common.py
+    else
+        echo "Not valid number!"
+        sleep 1
+    fi
 
 elif [ "$input" == "2" ]; then
 	cat ./setup/transforms.txt
@@ -113,22 +113,22 @@ elif [ "$input" == "2" ]; then
 	read -n 1 foo
 
 elif [ "$input" == "3" ]; then
-	c="$(cat ./bin/wigle_creds.txt | cut -d ":" -f 1,2)"
-	echo "Existing Wigle credentials: "$c
-        echo -n "Enter new username: "
-        read -e user
-	echo -n "Enter new password: "
-	read -e pass
-        if [ -z "$pass" ] || [ -z "$user" ] ; then
-		echo "[!] Cannot be blank!"
-		sleep 1
-        else
-      		echo $user:$pass: > ./bin/wigle_creds.txt
-	fi
+    c="$(cat ./bin/wigle_creds.txt | cut -d ":" -f 1,2)"
+    echo "Existing Wigle credentials: "$c
+    echo -n "Enter new username: "
+    read -e user
+    echo -n "Enter new password: "
+    read -e pass
+    if [ -z "$pass" ] || [ -z "$user" ] ; then
+        echo "[!] Cannot be blank!"
+        sleep 1
+    else
+        echo $user:$pass: > ./bin/wigle_creds.txt
+    fi
 
 
 elif [[ "$input" == "x" || "$input" == "X" ]]; then
-	conf_end=1
+    conf_end=1
 fi
 
 #config_menu
@@ -137,9 +137,9 @@ fi
 
 function menu {
 if [ -z $web_root ] || [ -z $vpn_server ] || [ -z $rsync_user ]; then
-	echo "Some variables are not set, press any key to enter configuration menu"
-	read -n 1
-	config_menu
+    echo "Some variables are not set, press any key to enter configuration menu"
+    read -n 1
+    config_menu
 fi
 wu="$(cat ./bin/wigle_creds.txt | cut -d ":" -f 1)"
 watchdog
@@ -171,91 +171,90 @@ Would you like to:
 Option:"
 read -t 1 -n 1 input
 if [[ -z $input ]]; then
-	return
+    return
 fi
 #echo $?
 
-echo ""                 
+echo ""
 
 if [ "$input" == "1" ]; then
-	echo Starting Snoopy....
-	snoopy_start
+    echo Starting Snoopy....
+    snoopy_start
 elif [ "$input" == "2" ]; then
-	echo Shutting down Snoopy...
-	snoopy_stop
+    echo Shutting down Snoopy...
+    snoopy_stop
 elif [ "$input" == "3" ]; then
-	clear
-	python ./bin/create_vpn_conf.py
-	echo "Press any key to return to main Snoopy menu"
-	read -n 1
+    clear
+    python ./bin/create_vpn_conf.py
+    echo "Press any key to return to main Snoopy menu"
+    read -n 1
 elif [ "$input" == "4" ]; then
-	conf_end=0
-	while [ "$conf_end" -eq "0" ]
-	do
-        	config_menu
-	done
+    conf_end=0
+    while [ "$conf_end" -eq "0" ]
+    do
+        config_menu
+    done
 
 elif [ "$input" == "5" ]; then
-#	i=$(sed "s,\(^.*\)</body>$,\1," ./setup/replace_html.txt)
-        echo "Current search string is:"
-	echo "-------------------------"
-	cat ./setup/replace_match.txt
-	echo "-------------------------"
-	echo ""
-        echo "Current replace string is:"
-        echo "-------------------------"
-        cat ./setup/replace_html.txt
-        echo "-------------------------"
-	echo ""
-	echo "Enter new search string, in one line (regex allowed): "
-	read -e input
-	echo "$input" > ./setup/replace_match.txt
-        echo "Enter new replace string, in one line (regex allowed): "
-        read -e input
-        echo "$input" > ./setup/replace_html.txt
-	echo "Done! Restart Snoopy to inact change."
-	sleep 1
+    # i=$(sed "s,\(^.*\)</body>$,\1," ./setup/replace_html.txt)
+    echo "Current search string is:"
+    echo "-------------------------"
+    cat ./setup/replace_match.txt
+    echo "-------------------------"
+    echo ""
+    echo "Current replace string is:"
+    echo "-------------------------"
+    cat ./setup/replace_html.txt
+    echo "-------------------------"
+    echo ""
+    echo "Enter new search string, in one line (regex allowed): "
+    read -e input
+    echo "$input" > ./setup/replace_match.txt
+    echo "Enter new replace string, in one line (regex allowed): "
+    read -e input
+    echo "$input" > ./setup/replace_html.txt
+    echo "Done! Restart Snoopy to inact change."
+    sleep 1
 
 elif [ "$input" == "6" ]; then
-	clear
-	echo " *** Tailing log file, hit any key to return to Snoopy menu ***"
-	echo ""
-	tail -f ./logs/snoopy.log &
-	p=$!
-	read -n 1 key
-	kill $p &> /dev/null
-	clear
-	
+    clear
+    echo " *** Tailing log file, hit any key to return to Snoopy menu ***"
+    echo ""
+    tail -f ./logs/snoopy.log &
+    p=$!
+    read -n 1 key
+    kill $p &> /dev/null
+    clear
+
 elif [[ "$input" == "x" || "$input" == "X" ]]; then
-	echo "Shutting down Snoopy..."
-	snoopy_stop
-	cat ./setup/sn.txt
-	end=1
+    echo "Shutting down Snoopy..."
+    snoopy_stop
+    cat ./setup/sn.txt
+    end=1
 
 elif [ "$input" == "?" ]; then
-	more ../README.txt
+    more ../README.txt
 else
-	echo '
-	       .-~~~~-.
-	      / __     \
-	     | /  \  /  `~~~~~-.
-	     ||    |  0         @
-	     ||    |  _.        |
-	     \|    |   \       /
-	      \    /  /`~~~~~~` \
-	      ('--'""`)         WOOF, BAD INPUT!
-	      /`"""""`\
-	'
-	sleep 1
+    echo '
+           .-~~~~-.
+          / __     \
+         | /  \  /  `~~~~~-.
+         ||    |  0         @
+         ||    |  _.        |
+         \|    |   \       /
+          \    /  /`~~~~~~` \
+          ('--'""`)         WOOF, BAD INPUT!
+          /`"""""`\
+    '
+    sleep 1
 fi
 }
 
-control_c()
-{
-  echo -en "\n*** Ouch! Exiting ***\n"
-  snoopy_stop
-  cat ./setup/sn.txt
-  exit
+control_c() {
+    echo -en "\n*** Ouch! Exiting ***\n"
+    snoopy_stop
+    cat ./setup/sn.txt
+    exit
 }
 trap control_c SIGINT
 
@@ -263,6 +262,5 @@ trap control_c SIGINT
 end=0
 while [ "$end" -eq "0" ]
 do
-        menu
+    menu
 done
-

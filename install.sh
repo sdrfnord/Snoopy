@@ -11,41 +11,41 @@
 ##
 ## also need to add ez_setup.py to the snoopy and run it before running pip
 ## after this install finishes with no problems but then wigle api gives an error so I installed
-## python-httplib2 and now I can query the api fine , but then I am now stuck with mysql auth error
+## python-httplib2 and now I can query the api fine, but then I am now stuck with mysql auth error.
 
 
 
 clear
 echo -en "
 +-----------------------------------------------------------------------------------------------+
-|          		     Welcome to the Snoopy V0.1 installer.     				|
-|                                                           					|
-|             			 SensePost Information Security                   		|
-|        		 research@sensepost.com / www.sensepost.com/labs         		|
+|                       Welcome to the Snoopy V0.1 installer.                                   |
+|                                                                                               |
+|                          SensePost Information Security                                       |
+|                 research@sensepost.com / www.sensepost.com/labs                               |
 +-----------------------------------------------------------------------------------------------+
-| Snoopy is a distributed tracking and profiling framework built by glenn@sensepost.com. 	|
-|												|
-| This script is intended to be run on a stock Ubuntu 12.04 32 bit server. It will attempt to	|
-| perform the following tasks:									|
-| 1. Create a user account, and copy Snoopy's files to the user's folder	 		|
-|    (drones will sync collected data here)							|
-| 2. Generate SSH keys for the user								|
-| 3. Ask you to select your server's public IP address						|
-| 4. Install Ubuntu packges: python-pip, gcc, libxml2-dev, libxslt-dev, python2.7-dev, xplico,	|
-|    mysql-server, squid3, apache2, openvpn, bind9, iptables-persistent, tshark, python-mysqldb	|
-| 5. Install Python packages: PIL, mitmproxy, ipaddr, publicsuffix, twisted			|
-| 6. Setup OpenVPN, BIND, Apache, and Squid (with custom configurations).			|
-| 7. Setup iptables rules									|
-| 												|
-| \E[5mWARNING:\E[25m											|
-| This script will overwrite existing Apache, Squid, BIND, OpenVPN and iptables configurations.	|
-|												|
-| By proceeding you accept that:								|
-|	- You have read and agree to the supplied LICENSE.txt 					|
-|	- SensePost takes no responsibility for any illegal activities perpetrated with		|
-|	  this tool.
-|												|
-| Press any key to continue...									|
+| Snoopy is a distributed tracking and profiling framework built by glenn@sensepost.com.        |
+|                                                                                               |
+| This script is intended to be run on a stock Ubuntu 12.04 32 bit server. It will attempt to   |
+| perform the following tasks:                                                                  |
+| 1. Create a user account, and copy Snoopy's files to the user's folder                        |
+|    (drones will sync collected data here)                                                     |
+| 2. Generate SSH keys for the user                                                             |
+| 3. Ask you to select your server's public IP address                                          |
+| 4. Install Ubuntu packges: python-pip, gcc, libxml2-dev, libxslt-dev, python2.7-dev, xplico,  |
+|    mysql-server, squid3, apache2, openvpn, bind9, iptables-persistent, tshark, python-mysqldb |
+| 5. Install Python packages: PIL, mitmproxy, ipaddr, publicsuffix, twisted                     |
+| 6. Setup OpenVPN, BIND, Apache, and Squid (with custom configurations).                       |
+| 7. Setup iptables rules                                                                       |
+|                                                                                               |
+| \E[5mWARNING:\E[25m                                                                           |
+| This script will overwrite existing Apache, Squid, BIND, OpenVPN and iptables configurations. |
+|                                                                                               |
+| By proceeding you accept that:                                                                |
+|    - You have read and agree to the supplied LICENSE.txt                                      |
+|    - SensePost takes no responsibility for any illegal activities perpetrated with            |
+|      this tool.                                                                               |
+|                                                                                               |
+| Press any key to continue...                                                                  |
 +-----------------------------------------------------------------------------------------------+"
 
 read foo

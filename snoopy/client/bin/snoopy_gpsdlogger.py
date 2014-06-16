@@ -2,7 +2,7 @@
 # Written by Dan Mandle http://dan.mandle.me September 2012
 # Samuel Cozannet: Added logger, Feb 2014
 # License: GPL 2.0
- 
+
 import os
 from gps import *
 from time import *
@@ -14,42 +14,42 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 # Setting the global variable
-gpsd = None 
+gpsd = None
 # logfile = "gpsd.log"
 # prepend_text="prepend"
 prepend_text = sys.argv[2]
 logfile = sys.argv[1]
 
 # Clear the terminal (optional, because it's nicer, only for debugging)
-# os.system('clear') 
- 
+# os.system('clear')
+
 class GpsPoller(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 		# Call global variable into scope
-		global gpsd 
+		global gpsd
 		# Starting datastream from GPS
-		gpsd = gps(mode=WATCH_ENABLE) 
+		gpsd = gps(mode=WATCH_ENABLE)
 		self.current_value = None
 		# Setting the thread running to true
-		self.running = True 
- 
+		self.running = True
+
 	def run(self):
 		global gpsd
 		while gpsp.running:
-			# This will continue to loop and grab EACH set of gpsd info 
-			# to clear the buffer. 
-			gpsd.next() 
- 
+			# This will continue to loop and grab EACH set of gpsd info
+			# to clear the buffer.
+			gpsd.next()
+
 if __name__ == '__main__':
 	# Create a new thread
-	gpsp = GpsPoller() 
+	gpsp = GpsPoller()
 	try:
 		gpsp.start() # start it up
 		while True:
 			# It may take a second or two to get good data
 			# print gpsd.fix.latitude,', ',gpsd.fix.longitude,'  Time: ',gpsd.utc
- 
+
 			os.system('clear')
 			f = open(logfile, "a")
 
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 			# To Do: publish data to API with JSON format
 
 			time.sleep(5) #set to whatever
-			 
+
 	except (KeyboardInterrupt, SystemExit): #when you press ctrl+c
 		print "\nKilling Thread..."
 		gpsp.running = False

