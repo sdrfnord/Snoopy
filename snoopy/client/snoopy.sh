@@ -3,6 +3,11 @@
 # Snoopy // 2012
 # By using this code you agree to abide by the supplied LICENSE.txt
 
+# TODO: -Get dhcp_relay working on the N900 such that we can run a
+# the DHCP daemon service on the Snoopy server.
+#       -Add more security to the rsync process.
+#       -Add watchdog to ensure everything is running properly
+
 # TODO:
 # Input validation! APs with a CSV metadata may break things. Convert SSID to Hex maybe?
 # Tshark needs to be upgraded in the Maemo repos - it's super old, and causes trouble.
