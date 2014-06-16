@@ -83,27 +83,27 @@ sed -i "s,^rsync_user_home=.*,rsync_user_home=\"$home_dir\"," ./setup/config
 echo "[+] On with configuration; let's set your public IP address"
 IPs=$(ifconfig | grep "inet addr"| sed 's/.*addr:\(\S*\)\s*.*/\1/'| grep -v "127.0.0.1")
 if [ -z "$IPs" ]; then
-        echo "[!] No available IP addresses!"
-	exit -1
+    echo "[!] No available IP addresses!"
+    exit -1
 else
-        echo "    Enter one of the following IP addresses:"
-        echo -e '    \E[31;1m'$IPs'\E[0m'
-        echo -n "    IP: "
-        read -e server_ip
+    echo "    Enter one of the following IP addresses:"
+    echo -e '    \E[31;1m'$IPs'\E[0m'
+    echo -n "    IP: "
+    read -e server_ip
 
-        if [[ "$IPs" != *$server_ip* ]]
-        then
-                echo "[!] You gave me a non-existent IP address! I even gave you the options to choose from :(";
-		exit -1
-        else
-                sed -i "s/^vpn_server=.*/vpn_server=\"$server_ip\"/" ./setup/config
-        fi
+    if [[ "$IPs" != *$server_ip* ]]
+    then
+        echo "[!] You gave me a non-existent IP address! I even gave you the options to choose from :(";
+        exit -1
+    else
+        sed -i "s/^vpn_server=.*/vpn_server=\"$server_ip\"/" ./setup/config
+    fi
 fi
 
 # Add xplico repo
 if [ "$xplico" == "yes" ]; then
-	echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" >> /etc/apt/sources.list
-	apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE &
+    echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" >> /etc/apt/sources.list
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE &
 fi
 
 echo "[+] Updating repositories..."
@@ -376,7 +376,7 @@ cat > /etc/network/if-post-down.d/iptables-unload << EOF
 
 iptables-save -c > /etc/iptables.rules
 if [ -f /etc/iptables.downrules ]; then
-   iptables-restore < /etc/iptables.downrules
+    iptables-restore < /etc/iptables.downrules
 fi
 exit 0
 EOF

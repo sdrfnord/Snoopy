@@ -15,9 +15,15 @@ status='Checking...'
 num_drones='Checking...'
 
 # Aggressively terminate other stale instances
-killall mitmdump &> /dev/null
-for i in `ps a | grep 'python' | grep  'snoopy_server.py\|sslstrip.py' | grep -v grep| cut -d " " -f 2`; do kill -9 $i &> /dev/null; done
-clear
+kill_all_snoopy_processes() {
+    killall mitmdump &> /dev/null
+    ## FIXME use pgrep or killall
+    for i in `ps a | grep 'python' | grep  'snoopy_server.py\|sslstrip.py' | grep -v grep| cut -d " " -f 2`; do
+        kill -9 $i &> /dev/null;
+    done
+    clear
+}
+kill_all_snoopy_processes
 
 function snoopy_start {
     echo "[+] Stopping Snoopy (if it's running)"
@@ -44,9 +50,7 @@ function snoopy_stop {
     kill -9 $pid_3  &> /dev/null
     kill -9 $p &> /dev/null #In case we're tailing logs (option 6)
     #Just in case:
-    killall mitmdump &> /dev/null
-    for i in `ps a | grep 'python' | grep  'snoopy_server.py\|sslstrip.py' | grep -v grep| cut -d " " -f 2`; do kill -9 $i &> /dev/null; done
-    clear
+    kill_all_snoopy_processes
 }
 
 function watchdog {
