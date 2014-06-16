@@ -1,5 +1,5 @@
 #!/bin/bash
-# glenn@sensepost.com 
+# glenn@sensepost.com
 # Snoopy // 2012
 # By using this code you agree to abide by the supplied LICENSE.txt
 
@@ -44,7 +44,5 @@ update-rc.d udhcp disable
 sed -i 's/disable_lua = false/disable_lua = true/g' /usr/share/wireshark/init.lua
 
 echo "+-----------------------------------------------------------------------------+"
-echo "+ Done. Run 'snoopy' now.  					 	    +"
+echo "+ Done. Run 'snoopy' now.  					 	                            +"
 echo "+-----------------------------------------------------------------------------+"
-
-

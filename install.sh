@@ -10,8 +10,8 @@
 ## sudo apt-get install build-essential libssl-dev libffi-dev
 ##
 ## also need to add ez_setup.py to the snoopy and run it before running pip
-## after this install finishes with no problems but then wigle api gives an error so i installed
-## python-httplib2 and now i can query the api fine , but then i am now stuck with mysql auth error
+## after this install finishes with no problems but then wigle api gives an error so I installed
+## python-httplib2 and now I can query the api fine , but then I am now stuck with mysql auth error
 
 
 
@@ -55,7 +55,7 @@ echo -n "[+] Let's create a Snoopy account. Please enter a name (enter for defau
 read user
 user="${user:=woodstock}"
 
-## Samnco: To do better managemnet of user creation (manage existing users)
+## Samnco: To do better management of user creation (manage existing users)
 useradd -c "Snoopy Account" -m $user
 if [ "$?" -ne 0 ]; then
         echo "[!] Failed to create user $user :("
