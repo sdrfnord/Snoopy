@@ -3,14 +3,14 @@
 # Snoopy // 2012
 
 # Snoopy server side setup script. Installs required packages, and reconfigures. This has only been
-# tested on Ubuntu 32bit 12.04 LTS Server. Read through it carefully if you're not installing on a 
+# tested on Ubuntu 32bit 12.04 LTS Server. Read through it carefully if you're not installing on a
 # fresh box that you don't mind breaking.
 
 ## need to add this to setup before installing the pip packages
 ## sudo apt-get install build-essential libssl-dev libffi-dev
 ##
 ## also need to add ez_setup.py to the snoopy and run it before running pip
-## after this install finishes with no problems but then wigle api gives an error so i installed 
+## after this install finishes with no problems but then wigle api gives an error so i installed
 ## python-httplib2 and now i can query the api fine , but then i am now stuck with mysql auth error
 
 
@@ -24,7 +24,7 @@ echo -en "
 |        		 research@sensepost.com / www.sensepost.com/labs         		|
 +-----------------------------------------------------------------------------------------------+
 | Snoopy is a distributed tracking and profiling framework built by glenn@sensepost.com. 	|
-|												| 	
+|												|
 | This script is intended to be run on a stock Ubuntu 12.04 32 bit server. It will attempt to	|
 | perform the following tasks:									|
 | 1. Create a user account, and copy Snoopy's files to the user's folder	 		|
@@ -77,7 +77,7 @@ if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 su - $user -c "mkdir -p $home_dir/snoopy/server/uploads"
 su - $user -c "mkdir -p $home_dir/snoopy/server/client_configs"
 echo "[+] Creating ssh keys for $user.."
-su - $user -c "ssh-keygen -f $home_dir/.ssh/id_rsa -N ''" 
+su - $user -c "ssh-keygen -f $home_dir/.ssh/id_rsa -N ''"
 su - $user -c "touch $home_dir/.ssh/authorized_keys"
 sed -i "s/^rsync_user=.*/rsync_user=\"$user\"/" ./setup/config
 
@@ -88,14 +88,14 @@ IPs=$(ifconfig | grep "inet addr"| sed 's/.*addr:\(\S*\)\s*.*/\1/'| grep -v "127
 if [ -z "$IPs" ]; then
         echo "[!] No available IP addresses!"
 	exit -1
-else   
+else
         echo "    Enter one of the following IP addresses:"
         echo -e '    \E[31;1m'$IPs'\E[0m'
         echo -n "    IP: "
         read -e server_ip
 
         if [[ "$IPs" != *$server_ip* ]]
-        then   
+        then
                 echo "[!] You gave me a non-existent IP address! I even gave you the options to choose from :(";
 		exit -1
         else
@@ -112,7 +112,7 @@ fi
 
 echo "[+] Updating repositories..."
 sleep 3
-apt-get update 
+apt-get update
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 
 echo "[+] Installing required packages..."
@@ -121,7 +121,7 @@ sleep 3
 apt-get install -y build-essential libssl-dev libffi-dev python-pip gcc libxml2-dev libxslt-dev python2.7-dev mysql-server squid3 openvpn bind9 tshark python-mysqldb apache2 python-beaker python-flask python-jinja2 python-mysqldb python-sqlalchemy python-werkzeug python-httplib2 openssh-server # added build-essential libssl-dev libffi-dev and python-httplib2
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 if [ "$xplico" == "yes" ]; then
-	apt-get install -y xplico 
+	apt-get install -y xplico
 fi
 python ez_setup.py #maybe this will make it work
 pip install lxml beautifulsoup  PIL mitmproxy ipaddr publicsuffix twisted cryptacular Flask_SQLAlchemy
@@ -141,19 +141,19 @@ rm -rf /etc/openvpn/easy-rsa/ /etc/openvpn/ccd/
 mkdir -p /etc/openvpn/easy-rsa/
 mkdir -p /etc/openvpn/ccd/
 #mkdir /etc/openvpn/packs/
-cp -R /usr/share/doc/openvpn/examples/easy-rsa/2.0/* /etc/openvpn/easy-rsa/ 
+cp -R /usr/share/doc/openvpn/examples/easy-rsa/2.0/* /etc/openvpn/easy-rsa/
 cd /etc/openvpn/easy-rsa/
 ln -s openssl-1.0.0.cnf openssl.cnf
-source ./vars 
-./clean-all 
+source ./vars
+./clean-all
 echo "    Creating server CA"
-./pkitool --initca 
+./pkitool --initca
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 echo "    Generating keys "
-./pkitool --server server 
+./pkitool --server server
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 echo "    Generating DH parameters (this may take some time)"
-./build-dh 
+./build-dh
 if [ "$?" -ne 0 ]; then echo "[!] Failed :("; exit 1; fi
 cd $home_dir/snoopy/server/
 
@@ -205,7 +205,7 @@ echo "[+] Configurating squid proxy with custom logging..."
 #########################
 # Update squid3.conf	#
 #########################
-#TODO: Figure out how to send logs directly to MySQL. I almost had it working, but fell back to 
+#TODO: Figure out how to send logs directly to MySQL. I almost had it working, but fell back to
 #	parsing a text file (with pytail.py)
 rm /etc/logrotate.d/squid3 &	#Disable log rotation
 ln -s /var/log/squid3/access.log $home_dir/snoopy/server/uploads/squid_logs.txt
@@ -228,7 +228,7 @@ cat /etc/squid3/squid.conf >> /etc/squid3/squid.conf.new
 mv /etc/squid3/squid.conf.new /etc/squid3/squid.conf
 
 echo "[+] Restarting squid"
-/etc/init.d/squid3 restart 
+/etc/init.d/squid3 restart
 
 
 echo "[+] Configuring BIND to control victims' DNS"
@@ -246,7 +246,7 @@ options {
 };
 EOF
 echo "[+] Restarting BIND..."
-/etc/init.d/bind9 restart 
+/etc/init.d/bind9 restart
 
 echo "[+] Configuring Apache webserver..."
 ##################
@@ -340,11 +340,11 @@ http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchTweetsByLocation.py (input en
 http://$server_ip/cgi-bin/$cgi_dir/transforms/fetchUAsFromClient.py (input entity Custom snoopy.Client)
 EOF
 
-/etc/init.d/apache2 restart 
+/etc/init.d/apache2 restart
 
 if [ "$xplico" == "yes" ]; then
 	echo "[+] Configuring xplico"
-	/opt/xplico/script/session_mng.pyc -n "Snoopy" "Data Intercepted" 
+	/opt/xplico/script/session_mng.pyc -n "Snoopy" "Data Intercepted"
 fi
 
 echo "[+] Setting iptables to transparently route web traffic to squid, and masquerade other."
@@ -399,10 +399,10 @@ net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1
 EOF
-sysctl -p 
+sysctl -p
 
 echo "[+] Creating Snoopy database user and populating database."
-#########################			
+#########################
 # Create database	#
 #########################
 stty -echo
