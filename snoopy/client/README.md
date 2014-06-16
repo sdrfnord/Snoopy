@@ -8,12 +8,14 @@ This is the Snoopy client side script. It handles launching of the two main comp
 # 1. Snoopy rogue access point component
 
 The rogue AP does the following:
+
 1. Brings up a VPN connection to our Snoopy server
 2. Loads injection drivers
 3. Brings up a [promiscuous] rogue access point
 4. Starts a DHCP server
 
 Notes:
+
 a. DHCP is handled locally, but the DNS is set to the Snoopy server.
    This allows us to do 'bad things' with DNS at a central point.
 b. The DHCP lease file is uploaded, and inserted into the Snoopy server.
